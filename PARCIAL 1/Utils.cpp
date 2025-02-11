@@ -1,6 +1,7 @@
 #include "Utils.h"
 
 using std::vector;
+using std::string;
 
 vector<int> Utils::stringToC(const char* str) {
     /**
@@ -114,4 +115,94 @@ int Utils::modInverse(int e, int phi) {
             return d;
     }
     return -1;
+}
+
+
+std::vector<uint8_t> Utils::serializeNumbers(const std::vector<int>& numbers) {
+    std::vector<uint8_t> binaryData;
+    for (int num : numbers) {
+        // Serialize each integer into 4 bytes (big-endian format)
+        for (int i = sizeof(int) - 1; i >= 0; --i) {
+            binaryData.push_back((num >> (i * 8)) & 0xFF);
+        }
+    }
+    return binaryData;
+}
+
+
+
+std::string Utils::binaryToBase64(const std::vector<uint8_t>& binaryData) {
+    BIO* b64 = BIO_new(BIO_f_base64());
+    BIO* mem = BIO_new(BIO_s_mem());
+    BIO_push(b64, mem);
+
+    // Disable line breaks in Base64 output
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+
+    // Write binary data to BIO
+    BIO_write(b64, binaryData.data(), binaryData.size());
+    BIO_flush(b64);
+
+    // Read the encoded data from BIO
+    BUF_MEM* bufferPtr;
+    BIO_get_mem_ptr(b64, &bufferPtr);
+    std::string result(bufferPtr->data, bufferPtr->length);
+
+    // Clean up
+    BIO_free_all(b64);
+
+    return result;
+}
+
+std::vector<uint8_t> Utils::base64ToBinary(const std::string& base64Str) {
+    BIO* b64 = BIO_new(BIO_f_base64());
+    BIO* mem = BIO_new_mem_buf(base64Str.data(), base64Str.size());
+    BIO_push(b64, mem);
+
+    // Disable line breaks in Base64 input
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+
+    // Read the decoded data from BIO
+    std::vector<uint8_t> binaryData(base64Str.size()); // Allocate enough space
+    int len = BIO_read(b64, binaryData.data(), base64Str.size());
+
+    // Resize to actual decoded length
+    binaryData.resize(len);
+
+    // Clean up
+    BIO_free_all(b64);
+
+    return binaryData;
+}
+
+std::vector<int> Utils::deserializeNumbers(const std::vector<uint8_t>& binaryData) {
+    std::vector<int> numbers;
+    size_t numInts = binaryData.size() / sizeof(int);
+    numbers.reserve(numInts);
+
+    for (size_t i = 0; i < binaryData.size(); i += sizeof(int)) {
+        int value = 0;
+        for (size_t j = 0; j < sizeof(int); ++j) {
+            value = (value << 8) | binaryData[i + j];
+        }
+        numbers.push_back(value);
+    }
+
+    return numbers;
+}
+
+char* Utils::numbersToBase64(const std::vector<int>& numbers) {
+    vector<uint8_t> binaryData = Utils::serializeNumbers(numbers);
+    string base64Str = Utils:git c:binaryToBase64(binaryData);
+
+    char* base64CStr = new char[base64Str.size() + 1];
+    strcpy(base64CStr, base64Str.c_str());
+
+    return base64CStr;
+}
+
+std::vector<int> Utils::base64ToNumbers(const char* base64CStr) {
+    string base64Str(base64CStr);
+    vector<uint8_t> binaryData = Utils::base64ToBinary(base64Str);
+    return Utils::deserializeNumbers(binaryData);
 }

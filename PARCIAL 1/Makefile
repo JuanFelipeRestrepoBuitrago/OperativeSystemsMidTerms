@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest
-LDFLAGS = -lgtest -lgtest_main -pthread
+LDFLAGS = -lgtest -lgtest_main -pthread -lcrypto
 OUTDIR = out
 
 all: $(OUTDIR)/tests/testUtils

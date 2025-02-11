@@ -2,6 +2,9 @@
 #include "../Utils.h"
 
 using std::vector;
+using std::string;
+using std::cout;
+using std::endl;
 
 TEST(UtilsTest, StringToCAndCToString) {
     const char* expectedStr = "Hola Soy Pipe";
@@ -18,6 +21,16 @@ TEST(UtilsTest, StringToCAndCToString) {
 
     EXPECT_STREQ(expectedStr2, str2);
     Utils::freeCString(str2);
+
+    // Test 3
+    vector<int> numbers = {5, 7990271};
+    char* str3 = Utils::numbersToBase64(numbers);
+    vector<int> decodedNumbers = Utils::base64ToNumbers(str3);
+
+    EXPECT_EQ(decodedNumbers.size(), numbers.size());
+    for (size_t i = 0; i < numbers.size(); i++) {
+        EXPECT_EQ(decodedNumbers[i], numbers[i]);
+    }
 }
 
 TEST(UtilsTest, PowerModulus) {
