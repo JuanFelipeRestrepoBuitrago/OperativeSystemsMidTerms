@@ -6,11 +6,14 @@ OUTDIR = out
 all: $(OUTDIR)/tests/testUtils
 
 # Run All Tests
-test: testUtils
+test: testRSA testUtils
 
 # Run tests
 testUtils: clean $(OUTDIR)/tests/testUtils
 	./$(OUTDIR)/tests/testUtils
+
+testRSA: clean $(OUTDIR)/tests/testRSA
+	./$(OUTDIR)/tests/testRSA
 
 # Linking the test executable
 $(OUTDIR)/tests/testUtils: $(OUTDIR)/tests/testUtils.o $(OUTDIR)/Utils.o
@@ -20,8 +23,19 @@ $(OUTDIR)/tests/testUtils: $(OUTDIR)/tests/testUtils.o $(OUTDIR)/Utils.o
 $(OUTDIR)/tests/testUtils.o: tests/testUtils.cpp | $(OUTDIR)/tests
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
+$(OUTDIR)/tests/testRSA: $(OUTDIR)/tests/testRSA.o $(OUTDIR)/RSA.o $(OUTDIR)/Utils.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Compile testRSA.cpp
+$(OUTDIR)/tests/testRSA.o: tests/testRSA.cpp | $(OUTDIR)/tests
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
 # Compile Utils.cpp
 $(OUTDIR)/Utils.o: Utils.cpp Utils.h | $(OUTDIR)
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
+# Compile RSA.cpp
+$(OUTDIR)/RSA.o: RSA.cpp RSA.h | $(OUTDIR)
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Create output directories if they don't exist

@@ -1,14 +1,9 @@
+
 #include "RSA.h"
-#include "Utils.h"
 
-using std::__gcd;
-using std::cout;
-using std::endl;
-using std::vector;
-
-RSA::RSA(int p, int q) : p(p), q(q), publicKey(nullptr), privateKey(nullptr) {
+Rsa::Rsa(int p, int q) : p(p), q(q), publicKey(nullptr), privateKey(nullptr) {
     /**
-     * Constructor for the RSA class
+     * Constructor for the Rsa class
      * 
      * @param p: The first prime number
      * @param q: The second prime number
@@ -17,16 +12,16 @@ RSA::RSA(int p, int q) : p(p), q(q), publicKey(nullptr), privateKey(nullptr) {
      */
 }
 
-RSA::~RSA() {
+Rsa::~Rsa() {
     /**
-     * Destructor for the RSA class
+     * Destructor for the Rsa class
      * 
      * @return: None
      */
     freeKeys();
 }
 
-ResultGenerateKeys RSA::generateKeys() {
+ResultGenerateKeys Rsa::generateKeys() {
     /**
      * Function to generate the public and private keys
      * 
@@ -49,14 +44,13 @@ ResultGenerateKeys RSA::generateKeys() {
     int d = Utils::modInverse(e, phi);
 
     // Convert the keys to string format
-
     ResultGenerateKeys result;
-    result.publicKey = Utils::cToString({e, n});
-    result.privateKey = Utils::cToString({d, n});
+    result.publicKey = Utils::numbersToBase64({e, n});
+    result.privateKey = Utils::numbersToBase64({d, n});
     return result;
 }
 
-char* RSA::encrypt(const char* message, const char* publicKey) {
+char* Rsa::encrypt(const char* message, const char* publicKey) {
     /**
      * Function to encrypt a message using the public key
      * 
@@ -72,17 +66,104 @@ char* RSA::encrypt(const char* message, const char* publicKey) {
         }
     }
 
-    vector<int> publicKeyValues = Utils::stringToC(publicKey);
-    int e = publicKeyValues[0];
-    int n = publicKeyValues[1];
+    vector<int> publicKeyValues = Utils::base64ToNumbers(publicKey);
 
     vector<int> messageValues = Utils::stringToC(message);
     
     vector<int> encryptedValues;
 
     for (int i = 0; i < messageValues.size(); i++) {
-        encryptedValues.push_back(Utils::powerModulus(messageValues[i], e, n));
+        encryptedValues.push_back(Utils::powerModulus(messageValues[i], publicKeyValues[0], publicKeyValues[1]));
     }
 
-    return Utils::cToString(encryptedValues);
+    return Utils::numbersToBase64(encryptedValues);
+}
+
+
+char* Rsa::decrypt(const char* message, const char* privateKey) {
+    /**
+     * Function to decrypt a message using the private key
+     * 
+     * @param message: The message to be decrypted
+     * @param privateKey: The private key to be used for decryption
+     * 
+     * @return: The decrypted message
+     */
+    if (privateKey == nullptr) {
+        privateKey = this -> privateKey;
+        if (privateKey == nullptr) {
+            throw std::invalid_argument("No private key provided or set in the class.");
+        }
+    }
+
+    vector<int> privateKeyValues = Utils::base64ToNumbers(privateKey);
+
+    vector<int> messageValues = Utils::base64ToNumbers(message);
+    
+    vector<int> decryptedValues;
+
+    for (int i = 0; i < messageValues.size(); i++) {
+        decryptedValues.push_back(Utils::powerModulus(messageValues[i], privateKeyValues[0], privateKeyValues[1]));
+    }
+
+    return Utils::cToString(decryptedValues);
+}
+
+char* Rsa::getPublicKey() {
+    /**
+     * Function to get the public key
+     * 
+     * @return: The public key
+     */
+    return publicKey;
+}
+
+char* Rsa::getPrivateKey() {
+    /**
+     * Function to get the private key
+     * 
+     * @return: The private key
+     */
+    return privateKey;
+}
+
+void Rsa::setPublicKey(const char* publicKey) {
+    /**
+     * Function to set the public key
+     * 
+     * @param publicKey: The public key to be set
+     * 
+     * @return: None
+     */
+    this -> publicKey = new char[strlen(publicKey) + 1];
+    strcpy(this -> publicKey, publicKey);
+}
+
+void Rsa::setPrivateKey(const char* privateKey) {
+    /**
+     * Function to set the private key
+     * 
+     * @param privateKey: The private key to be set
+     * 
+     * @return: None
+     */
+    this -> privateKey = new char[strlen(privateKey) + 1];
+    strcpy(this -> privateKey, privateKey);
+}
+
+void Rsa::freeKeys() {
+    /**
+     * Function to free the memory allocated for the keys
+     * 
+     * @return: None
+     */
+    if (publicKey != nullptr) {
+        delete[] publicKey;
+        publicKey = nullptr;
+    }
+
+    if (privateKey != nullptr) {
+        delete[] privateKey;
+        privateKey = nullptr;
+    }
 }
