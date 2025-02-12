@@ -1,31 +1,37 @@
 #include <gtest/gtest.h>
-#include "../Utils.h"
+#include "../helpers/Utils.h"
 
 using std::vector;
+using std::string;
+using std::cout;
+using std::endl;
 
 TEST(UtilsTest, StringToCAndCToString) {
     const char* expectedStr = "Hola Soy Pipe";
     vector<int> bytes = Utils::stringToC(expectedStr);
+    cout << endl;
     char* str = Utils::cToString(bytes);
 
     EXPECT_STREQ(expectedStr, str);
     Utils::freeCString(str);
 
     // Test 2
-    const char* expectedStr2 = "Hola Soy Pipe!";
-    const vector<int> expected = vector<int>({5, 7990271});
-    char* str2 = Utils::cToString(expected);
-    size_t dataLength = strlen(str2);
-    // Debug: Print raw bytes of str2
-    std::cout << "str2 bytes (hex): ";
-    for (size_t i = 0; i < dataLength; i++) {
-        std::cout << std::hex << static_cast<int>(static_cast<unsigned char>(str2[i])) << " ";
-    }
-    std::cout << std::dec << std::endl;
-    vector<int> bytes2 = Utils::stringToC(str2);
+    const char* expectedStr2 = "5 7990271";
+    vector<int> bytes2 = Utils::stringToC(expectedStr2);
+    char* str2 = Utils::cToString(bytes2);
 
-    EXPECT_EQ(expected, bytes2);
+    EXPECT_STREQ(expectedStr2, str2);
     Utils::freeCString(str2);
+
+    // Test 3
+    vector<int> numbers = {5, 7990271};
+    char* str3 = Utils::numbersToBase64(numbers);
+    vector<int> decodedNumbers = Utils::base64ToNumbers(str3);
+
+    EXPECT_EQ(decodedNumbers.size(), numbers.size());
+    for (size_t i = 0; i < numbers.size(); i++) {
+        EXPECT_EQ(decodedNumbers[i], numbers[i]);
+    }
 }
 
 TEST(UtilsTest, PowerModulus) {
