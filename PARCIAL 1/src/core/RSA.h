@@ -1,7 +1,7 @@
 #ifndef RSA_H
 #define RSA_H
 
-#include "Utils.h"
+#include "../helpers/Utils.h"
 #include <bits/stdc++.h>
 #include <stdexcept>
 #include <vector>

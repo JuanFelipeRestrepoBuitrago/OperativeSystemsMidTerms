@@ -1,5 +1,5 @@
-#include "../Utils.h"
-#include "../RSA.h"
+#include "../helpers/Utils.h"
+#include "../core/RSA.h"
 #include <gtest/gtest.h>
 
 using std::vector;
