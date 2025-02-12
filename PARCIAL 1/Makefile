@@ -2,40 +2,41 @@ CC = g++
 CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest
 LDFLAGS = -lgtest -lgtest_main -pthread -lcrypto
 OUTDIR = out
+SOURCE = src
 
-all: $(OUTDIR)/tests/testUtils
+all: test
 
 # Run All Tests
-test: testUtils testRSA
+test: clean testUtils testRSA
 
 # Run tests
-testUtils: clean $(OUTDIR)/tests/testUtils
+testUtils: $(OUTDIR)/tests/testUtils
 	./$(OUTDIR)/tests/testUtils
 
-testRSA: clean $(OUTDIR)/tests/testRSA
+testRSA: $(OUTDIR)/tests/testRSA
 	./$(OUTDIR)/tests/testRSA
 
 # Linking the test executable
-$(OUTDIR)/tests/testUtils: $(OUTDIR)/tests/testUtils.o $(OUTDIR)/Utils.o
+$(OUTDIR)/tests/testUtils: $(OUTDIR)/tests/testUtils.o $(OUTDIR)/helpers/Utils.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Compile testUtils.cpp
-$(OUTDIR)/tests/testUtils.o: tests/testUtils.cpp | $(OUTDIR)/tests
+$(OUTDIR)/tests/testUtils.o: $(SOURCE)/tests/testUtils.cpp | $(OUTDIR)/tests
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
-$(OUTDIR)/tests/testRSA: $(OUTDIR)/tests/testRSA.o $(OUTDIR)/RSA.o $(OUTDIR)/Utils.o
+$(OUTDIR)/tests/testRSA: $(OUTDIR)/tests/testRSA.o $(OUTDIR)/core/RSA.o $(OUTDIR)/helpers/Utils.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Compile testRSA.cpp
-$(OUTDIR)/tests/testRSA.o: tests/testRSA.cpp | $(OUTDIR)/tests
+$(OUTDIR)/tests/testRSA.o: $(SOURCE)/tests/testRSA.cpp | $(OUTDIR)/tests
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile Utils.cpp
-$(OUTDIR)/Utils.o: Utils.cpp Utils.h | $(OUTDIR)
+$(OUTDIR)/helpers/Utils.o: $(SOURCE)/helpers/Utils.cpp $(SOURCE)/helpers/Utils.h | $(OUTDIR)/helpers
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile RSA.cpp
-$(OUTDIR)/RSA.o: RSA.cpp RSA.h | $(OUTDIR)
+$(OUTDIR)/core/RSA.o: $(SOURCE)/core/RSA.cpp $(SOURCE)/core/RSA.h | $(OUTDIR)/core
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Create output directories if they don't exist
@@ -44,6 +45,12 @@ $(OUTDIR):
 
 $(OUTDIR)/tests:
 	mkdir -p $(OUTDIR)/tests
+
+$(OUTDIR)/helpers:
+	mkdir -p $(OUTDIR)/helpers
+
+$(OUTDIR)/core:
+	mkdir -p $(OUTDIR)/core
 
 # Clean output files
 clean:
