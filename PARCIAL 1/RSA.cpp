@@ -1,12 +1,9 @@
 
 #include "RSA.h"
-<<<<<<< HEAD
 #include "Utils.h"
 #include "Utils.h"
 #include "FileManager.h"
 
-=======
->>>>>>> origin/rsa/juan_felipe
 
 Rsa::Rsa(int p, int q) : p(p), q(q), publicKey(nullptr), privateKey(nullptr) {
     /**
