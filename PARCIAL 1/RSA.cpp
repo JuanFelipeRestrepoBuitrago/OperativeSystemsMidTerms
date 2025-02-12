@@ -1,9 +1,5 @@
 
 #include "RSA.h"
-#include "Utils.h"
-#include "Utils.h"
-#include "FileManager.h"
-
 
 Rsa::Rsa(int p, int q) : p(p), q(q), publicKey(nullptr), privateKey(nullptr) {
     /**
