@@ -9,6 +9,7 @@ using std::endl;
 TEST(UtilsTest, StringToCAndCToString) {
     const char* expectedStr = "Hola Soy Pipe";
     vector<int> bytes = Utils::stringToC(expectedStr);
+    cout << endl;
     char* str = Utils::cToString(bytes);
 
     EXPECT_STREQ(expectedStr, str);

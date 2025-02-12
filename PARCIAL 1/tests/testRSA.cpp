@@ -22,6 +22,23 @@ TEST(RSATest, GenerateKeys) {
     EXPECT_EQ(privateKeyValues.size(), 2);
 }
 
+TEST(RSATest, EncryptAndDecrypt) {
+    Rsa rsa(7919, 1009);
+    ResultGenerateKeys keys = rsa.generateKeys();
+
+    const char* message = "Hola Soy Pipe";
+    char* encryptedMessage = rsa.encrypt(message, keys.publicKey);
+    char* decryptedMessage = rsa.decrypt(encryptedMessage, keys.privateKey);
+
+    std::cout << "Encrypted Message: " << encryptedMessage << std::endl;
+    std::cout << "Decrypted Message: " << decryptedMessage << std::endl;
+
+    EXPECT_STREQ(message, decryptedMessage);
+
+    Utils::freeCString(encryptedMessage);
+    Utils::freeCString(decryptedMessage);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

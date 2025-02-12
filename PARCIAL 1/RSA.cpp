@@ -72,7 +72,7 @@ char* Rsa::encrypt(const char* message, const char* publicKey) {
     
     vector<int> encryptedValues;
 
-    for (int i = 0; i < messageValues.size(); i++) {
+    for (size_t i = 0; i < messageValues.size(); i++) {
         encryptedValues.push_back(Utils::powerModulus(messageValues[i], publicKeyValues[0], publicKeyValues[1]));
     }
 
@@ -102,7 +102,7 @@ char* Rsa::decrypt(const char* message, const char* privateKey) {
     
     vector<int> decryptedValues;
 
-    for (int i = 0; i < messageValues.size(); i++) {
+    for (size_t i = 0; i < messageValues.size(); i++) {
         decryptedValues.push_back(Utils::powerModulus(messageValues[i], privateKeyValues[0], privateKeyValues[1]));
     }
 

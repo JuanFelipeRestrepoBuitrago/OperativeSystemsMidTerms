@@ -14,27 +14,10 @@ vector<int> Utils::stringToC(const char* str) {
     vector<int> bytes;
     size_t len = strlen(str);
 
-    // Calculate the number of padding bytes needed
-    size_t padding = (4 - (len % 4)) % 4;
-
-    // Create a padded copy of the input string
-    char* paddedStr = new char[len + padding + 1]; // +1 for null terminator
-    strcpy(paddedStr, str); // Copy the original string
-    memset(paddedStr + len, 0, padding); // Pad with null characters
-    paddedStr[len + padding] = '\0'; // Null-terminate the padded string
-
-    for (size_t i = 0; i < len; i += 4) {
-        // Convert 4 characters into an integer
-        int C = (static_cast<unsigned char>(str[i]) << 24) |
-                (static_cast<unsigned char>(str[i + 1]) << 16) |
-                (static_cast<unsigned char>(str[i + 2]) << 8) |
-                static_cast<unsigned char>(str[i + 3]);
-        // Add the integer to the vector
-        bytes.push_back(C);
+    for (size_t i = 0; i < len; i ++) {
+        int C = static_cast<int>(str[i]);
+        bytes.push_back(C);        
     }
-
-    // Free the padded string
-    delete[] paddedStr;
     
     return bytes;
 }
@@ -52,10 +35,7 @@ char* Utils::cToString(const vector<int>& bytes) {
     size_t index = 0;
 
     for (int C : bytes) {
-        // Extract 4 bytes of the integer number and convert each byte into characters
-        for (int i = 3; i >= 0; i--) {
-            str[index++] = static_cast<char>((C >> (i * 8)) & 0xFF);
-        }
+        str[index++] = static_cast<char>(C);
     }
 
     str[index] = '\0'; // Null-terminate the string
@@ -82,7 +62,7 @@ int Utils::powerModulus(int base, int expo, int m) {
      * @return: The result of base^expo mod m
      */
 
-    if (m == 1) return 0; // Anything mod 1 is always 0
+    // if (m == 1) return 0; // Anything mod 1 is always 0
 
     int result = 1;
     // Base reduced to prevent overflow
@@ -193,7 +173,7 @@ std::vector<int> Utils::deserializeNumbers(const std::vector<uint8_t>& binaryDat
 
 char* Utils::numbersToBase64(const std::vector<int>& numbers) {
     vector<uint8_t> binaryData = Utils::serializeNumbers(numbers);
-    string base64Str = Utils:git c:binaryToBase64(binaryData);
+    string base64Str = Utils::binaryToBase64(binaryData);
 
     char* base64CStr = new char[base64Str.size() + 1];
     strcpy(base64CStr, base64Str.c_str());

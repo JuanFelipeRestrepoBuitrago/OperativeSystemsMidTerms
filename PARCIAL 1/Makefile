@@ -6,7 +6,7 @@ OUTDIR = out
 all: $(OUTDIR)/tests/testUtils
 
 # Run All Tests
-test: testRSA testUtils
+test: testUtils testRSA
 
 # Run tests
 testUtils: clean $(OUTDIR)/tests/testUtils
