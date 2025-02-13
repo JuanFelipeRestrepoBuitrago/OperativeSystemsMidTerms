@@ -23,7 +23,7 @@ void printHelp(const char* programName) {
     std::cout << "  --encrypt, -e      Encrypt a message file using a public key\n";
     std::cout << "  --decrypt, -d      Decrypt a message file using a private key\n";
     std::cout << "\nExamples:\n";
-    std::cout << "  " << programName << " --generate\n";
+    std::cout << "  " << programName << " --generate keys/public_key.txt keys/private_key.txt\n";
     std::cout << "  " << programName << " --encrypt messages/original_message.txt keys/public_key.txt\n";
     std::cout << "  " << programName << " --decrypt messages/encrypted_message.txt keys/private_key.txt\n";
     std::cout << std::endl;
@@ -39,8 +39,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int PRIME1 = std::stoi(std::getenv("PRIME1"));
-    int PRIME2 = std::stoi(std::getenv("PRIME2"));
+    const char* prime1_env = std::getenv("PRIME1");
+    const char* prime2_env = std::getenv("PRIME2");
+
+    if (!prime1_env || !prime2_env) {
+        std::cerr << "Error: Las variables de entorno PRIME1 y PRIME2 deben estar definidas." << std::endl;
+        return 1;
+    }
+
+    int PRIME1 = std::stoi(prime1_env);
+    int PRIME2 = std::stoi(prime2_env);
 
     Rsa rsa_management(PRIME1, PRIME2);
 
@@ -59,7 +67,7 @@ int main(int argc, char* argv[]) {
         const char* defaultPublicKeyPath;
         const char* defaultPrivateKeyPath;
 
-        if (argc<2){
+        if (argc<=2){
             defaultPublicKeyPath = "keys/public_key.txt";
             defaultPrivateKeyPath = "keys/private_key.txt";
         }

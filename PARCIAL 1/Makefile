@@ -76,6 +76,9 @@ $(OUTDIR)/$(SOURCE_DIR)/helpers: | $(OUTDIR)
 $(OUTDIR)/$(SOURCE_DIR)/core: | $(OUTDIR)
 	mkdir -p $(OUTDIR)/$(SOURCE_DIR)/core
 
+$(OUTDIR)/$(SOURCE_DIR): | $(OUTDIR)
+	mkdir -p $(OUTDIR)/$(SOURCE_DIR)
+
 
 # Clean output files
 clean:
