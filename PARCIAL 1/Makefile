@@ -47,7 +47,7 @@ $(OUTDIR)/$(TEST_DIR)/testRSA.o: $(TEST_DIR)/testRSA.cpp $(SOURCE_DIR)/core/RSA.
 # Compile Source Files
 
 # Compile main.cpp
-$(OUTDIR)/$(SOURCE_DIR)/main.o: $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)
+$(OUTDIR)/$(SOURCE_DIR)/main.o: $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile FileManager.cpp
