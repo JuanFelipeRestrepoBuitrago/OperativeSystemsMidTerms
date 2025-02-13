@@ -98,8 +98,16 @@ int Utils::modInverse(int e, int phi) {
 }
 
 
-std::vector<uint8_t> Utils::serializeNumbers(const std::vector<int>& numbers) {
-    std::vector<uint8_t> binaryData;
+vector<uint8_t> Utils::serializeNumbers(const vector<int>& numbers) {
+    /**
+     * Function to serialize a vector of integers into a byte array
+     * 
+     * @param numbers: The vector of integers to be serialized
+     * 
+     * @return: The byte array representation of the input vector
+     */
+    vector<uint8_t> binaryData;
+    //
     for (int num : numbers) {
         // Serialize each integer into 4 bytes (big-endian format)
         for (int i = sizeof(int) - 1; i >= 0; --i) {
