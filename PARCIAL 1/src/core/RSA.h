@@ -2,9 +2,17 @@
 #define RSA_H
 
 #include "../helpers/Utils.h"
-#include <bits/stdc++.h>
 #include <stdexcept>
 #include <vector>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cmath>
+#include <algorithm>
+#include <stdexcept>
+#include <cstdint>
+#include <numeric>
+
 
 using std::__gcd;
 using std::cout;
@@ -33,6 +41,9 @@ public:
     void setPublicKey(const char* publicKey);
     void setPrivateKey(const char* privateKey);
     void freeKeys();
+    void encryptFile(const std::string& inputFilePath, const std::string& outputFilePath, const char* publicKey);
+    void decryptFile(const std::string& inputFilePath, const std::string& outputFilePath, const char* privateKey);
+
 };
 
 #endif
