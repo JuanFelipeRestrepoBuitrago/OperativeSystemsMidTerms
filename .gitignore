@@ -1,1 +1,17 @@
-out/
+# Archivos de macOS
+.DS_Store
+._*
+
+# Archivos de C++ compilados
+*.o
+*.out
+*.exe
+*.dSYM/
+*.obj
+*.dll
+*.so
+*.a
+*.lib
+
+# Configuración de Visual Studio Code
+.vscode/

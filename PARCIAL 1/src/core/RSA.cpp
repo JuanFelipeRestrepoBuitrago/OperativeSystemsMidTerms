@@ -1,5 +1,5 @@
-
 #include "RSA.h"
+#include <numeric>
 
 Rsa::Rsa(int p, int q) : p(p), q(q), publicKey(nullptr), privateKey(nullptr) {
     /**
@@ -30,12 +30,12 @@ ResultGenerateKeys Rsa::generateKeys() {
     int n, e;
 
     // Calculate the Euler's Totient Function of n
-    n = this -> p * q;
-    int phi = (this -> p - 1) * (this -> q - 1);
+    n = this->p * q;
+    int phi = (this->p - 1) * (this->q - 1);
 
     // Choose e, where 1 < e < phi(n) and gcd(e, phi(n)) == 1
     for (e = 2; e < phi; e++) {
-        if (__gcd(e, phi) == 1) {
+        if (std::gcd(static_cast<unsigned int>(e), static_cast<unsigned int>(phi)) == 1) {
             break;
         }
     }
@@ -60,14 +60,13 @@ char* Rsa::encrypt(const char* message, const char* publicKey) {
      * @return: The encrypted message
      */
     if (publicKey == nullptr) {
-        publicKey = this -> publicKey;
+        publicKey = this->publicKey;
         if (publicKey == nullptr) {
             throw std::invalid_argument("No public key provided or set in the class.");
         }
     }
 
     vector<int> publicKeyValues = Utils::base64ToNumbers(publicKey);
-
     vector<int> messageValues = Utils::stringToC(message);
     
     vector<int> encryptedValues;
@@ -79,7 +78,6 @@ char* Rsa::encrypt(const char* message, const char* publicKey) {
     return Utils::numbersToBase64(encryptedValues);
 }
 
-
 char* Rsa::decrypt(const char* message, const char* privateKey) {
     /**
      * Function to decrypt a message using the private key
@@ -90,14 +88,13 @@ char* Rsa::decrypt(const char* message, const char* privateKey) {
      * @return: The decrypted message
      */
     if (privateKey == nullptr) {
-        privateKey = this -> privateKey;
+        privateKey = this->privateKey;
         if (privateKey == nullptr) {
             throw std::invalid_argument("No private key provided or set in the class.");
         }
     }
 
     vector<int> privateKeyValues = Utils::base64ToNumbers(privateKey);
-
     vector<int> messageValues = Utils::base64ToNumbers(message);
     
     vector<int> decryptedValues;
@@ -135,8 +132,8 @@ void Rsa::setPublicKey(const char* publicKey) {
      * 
      * @return: None
      */
-    this -> publicKey = new char[strlen(publicKey) + 1];
-    strcpy(this -> publicKey, publicKey);
+    this->publicKey = new char[strlen(publicKey) + 1];
+    strcpy(this->publicKey, publicKey);
 }
 
 void Rsa::setPrivateKey(const char* privateKey) {
@@ -147,8 +144,8 @@ void Rsa::setPrivateKey(const char* privateKey) {
      * 
      * @return: None
      */
-    this -> privateKey = new char[strlen(privateKey) + 1];
-    strcpy(this -> privateKey, privateKey);
+    this->privateKey = new char[strlen(privateKey) + 1];
+    strcpy(this->privateKey, privateKey);
 }
 
 void Rsa::freeKeys() {

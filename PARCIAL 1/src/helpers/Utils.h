@@ -1,16 +1,17 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <bits/stdc++.h>
-#include <cstring>
-#include <cmath>
-
+#include <iostream>
 #include <vector>
+#include <string>
 #include <cstdint>
+#include <cmath>
+#include <algorithm>
+#include <stdexcept>
+#include <cstring>  // Para manejo de strings en C
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
-#include <string>
 
 class Utils {
 public:
@@ -27,4 +28,4 @@ public:
     static std::vector<int> base64ToNumbers(const char* base64CStr);
 };
 
-#endif
+#endif // UTILS_H
