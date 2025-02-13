@@ -119,7 +119,15 @@ vector<uint8_t> Utils::serializeNumbers(const vector<int>& numbers) {
 
 
 
-std::string Utils::binaryToBase64(const std::vector<uint8_t>& binaryData) {
+string Utils::binaryToBase64(const vector<uint8_t>& binaryData) {
+    /**
+     * Function to convert binary data to Base64 encoded string
+     * 
+     * @param binaryData: The binary data to be encoded
+     * 
+     * @return: The Base64 encoded string
+     */
+    // Create a BIO chain to encode the binary data
     BIO* b64 = BIO_new(BIO_f_base64());
     BIO* mem = BIO_new(BIO_s_mem());
     BIO_push(b64, mem);
@@ -134,7 +142,7 @@ std::string Utils::binaryToBase64(const std::vector<uint8_t>& binaryData) {
     // Read the encoded data from BIO
     BUF_MEM* bufferPtr;
     BIO_get_mem_ptr(b64, &bufferPtr);
-    std::string result(bufferPtr->data, bufferPtr->length);
+    string result(bufferPtr -> data, bufferPtr -> length);
 
     // Clean up
     BIO_free_all(b64);
@@ -142,7 +150,15 @@ std::string Utils::binaryToBase64(const std::vector<uint8_t>& binaryData) {
     return result;
 }
 
-std::vector<uint8_t> Utils::base64ToBinary(const std::string& base64Str) {
+vector<uint8_t> Utils::base64ToBinary(const string& base64Str) {
+    /**
+     * Function to convert Base64 encoded string to binary data
+     * 
+     * @param base64Str: The Base64 encoded string to be decoded
+     * 
+     * @return: The binary data decoded from the input string
+     */
+    // Create a BIO chain to decode the Base64 string
     BIO* b64 = BIO_new(BIO_f_base64());
     BIO* mem = BIO_new_mem_buf(base64Str.data(), base64Str.size());
     BIO_push(b64, mem);
@@ -151,7 +167,7 @@ std::vector<uint8_t> Utils::base64ToBinary(const std::string& base64Str) {
     BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
 
     // Read the decoded data from BIO
-    std::vector<uint8_t> binaryData(base64Str.size()); // Allocate enough space
+    vector<uint8_t> binaryData(base64Str.size()); // Allocate enough space
     int len = BIO_read(b64, binaryData.data(), base64Str.size());
 
     // Resize to actual decoded length
@@ -163,11 +179,21 @@ std::vector<uint8_t> Utils::base64ToBinary(const std::string& base64Str) {
     return binaryData;
 }
 
-std::vector<int> Utils::deserializeNumbers(const std::vector<uint8_t>& binaryData) {
+vector<int> Utils::deserializeNumbers(const vector<uint8_t>& binaryData) {
+    /**
+     * Function to deserialize a byte array into a vector of integers
+     * 
+     * @param binaryData: The byte array to be deserialized
+     * 
+     * @return: The vector of integers representation of the input byte array
+     */
     std::vector<int> numbers;
+    // Calculate the number of integers
     size_t numInts = binaryData.size() / sizeof(int);
+    // Reserve space for the integers
     numbers.reserve(numInts);
 
+    // Deserialize each integer from 4 bytes (big-endian format)
     for (size_t i = 0; i < binaryData.size(); i += sizeof(int)) {
         int value = 0;
         for (size_t j = 0; j < sizeof(int); ++j) {
@@ -180,9 +206,19 @@ std::vector<int> Utils::deserializeNumbers(const std::vector<uint8_t>& binaryDat
 }
 
 char* Utils::numbersToBase64(const std::vector<int>& numbers) {
+    /**
+     * Function to convert a vector of integers to a Base64 encoded string
+     * 
+     * @param numbers: The vector of integers to be encoded
+     * 
+     * @return: The Base64 encoded string representation of the input vector
+     */
+    // Serialize the numbers into a byte array
     vector<uint8_t> binaryData = Utils::serializeNumbers(numbers);
+    // Convert the binary data to Base64 encoded string
     string base64Str = Utils::binaryToBase64(binaryData);
 
+    // Allocate memory for the C-style string
     char* base64CStr = new char[base64Str.size() + 1];
     strcpy(base64CStr, base64Str.c_str());
 
@@ -190,7 +226,18 @@ char* Utils::numbersToBase64(const std::vector<int>& numbers) {
 }
 
 std::vector<int> Utils::base64ToNumbers(const char* base64CStr) {
+    /**
+     * Function to convert a Base64 encoded string to a vector of integers
+     * 
+     * @param base64CStr: The Base64 encoded string to be decoded
+     * 
+     * @return: The vector of integers representation of the input Base64 string
+     */
+    // Convert the C-style string to a C++ string
     string base64Str(base64CStr);
+    // Convert the Base64 string to binary data
     vector<uint8_t> binaryData = Utils::base64ToBinary(base64Str);
+    
+    // Deserialize the binary data into a vector of integers
     return Utils::deserializeNumbers(binaryData);
 }

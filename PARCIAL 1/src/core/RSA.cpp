@@ -59,6 +59,7 @@ char* Rsa::encrypt(const char* message, const char* publicKey) {
      * 
      * @return: The encrypted message
      */
+    // If the public key is not provided and not set in the class, throw an error
     if (publicKey == nullptr) {
         publicKey = this->publicKey;
         if (publicKey == nullptr) {
@@ -66,15 +67,18 @@ char* Rsa::encrypt(const char* message, const char* publicKey) {
         }
     }
 
+    // Convert the public key and message to integer values
     vector<int> publicKeyValues = Utils::base64ToNumbers(publicKey);
     vector<int> messageValues = Utils::stringToC(message);
     
     vector<int> encryptedValues;
 
+    // Encrypt each character of the message
     for (size_t i = 0; i < messageValues.size(); i++) {
         encryptedValues.push_back(Utils::powerModulus(messageValues[i], publicKeyValues[0], publicKeyValues[1]));
     }
 
+    // Convert the encrypted values to Base64 encoded string
     return Utils::numbersToBase64(encryptedValues);
 }
 
@@ -87,6 +91,7 @@ char* Rsa::decrypt(const char* message, const char* privateKey) {
      * 
      * @return: The decrypted message
      */
+    // If the private key is not provided and not set in the class, throw an error
     if (privateKey == nullptr) {
         privateKey = this->privateKey;
         if (privateKey == nullptr) {
@@ -94,15 +99,18 @@ char* Rsa::decrypt(const char* message, const char* privateKey) {
         }
     }
 
+    // Convert the private key and message to integer values
     vector<int> privateKeyValues = Utils::base64ToNumbers(privateKey);
     vector<int> messageValues = Utils::base64ToNumbers(message);
     
     vector<int> decryptedValues;
 
+    // Decrypt each character of the message
     for (size_t i = 0; i < messageValues.size(); i++) {
         decryptedValues.push_back(Utils::powerModulus(messageValues[i], privateKeyValues[0], privateKeyValues[1]));
     }
 
+    // Convert the decrypted values to a string
     return Utils::cToString(decryptedValues);
 }
 
