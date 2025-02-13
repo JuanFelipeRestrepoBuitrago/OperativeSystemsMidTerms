@@ -1,8 +1,8 @@
-# Archivos de macOS
+# macOS Files
 .DS_Store
 ._*
 
-# Archivos de C++ compilados
+# C++ Compiled files
 *.o
 *.out
 *.exe
@@ -13,5 +13,10 @@
 *.a
 *.lib
 
-# Configuración de Visual Studio Code
+# Visual Studio Code Config
 .vscode/
+
+# Build de CMake
+out/
+keys/
+messages/
