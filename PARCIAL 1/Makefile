@@ -1,93 +1,82 @@
-# Compiler and flags
 CC = g++
-CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest -I$(SRC_DIR) \
-         -I/opt/homebrew/opt/openssl@3/include -I/opt/homebrew/opt/googletest/include
-LDFLAGS = -L/opt/homebrew/opt/openssl@3/lib -L/opt/homebrew/opt/googletest/lib \
-          -lgtest -lgtest_main -pthread -lcrypto -lssl
+CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest
+LDFLAGS = -lgtest -lgtest_main -pthread -lcrypto
+MACFLAGS = -I/opt/homebrew/opt/openssl@3/include -I/opt/homebrew/opt/googletest/include -L/opt/homebrew/opt/openssl@3/lib -L/opt/homebrew/opt/googletest/lib
 
+SOURCE_DIR = src
 OUTDIR = out
-SRC_DIR = src
-TEST_DIR = src/tests
 
-# Main executable
-TARGET = $(OUTDIR)/rsa_exec
+all: $(OUTDIR)/rsa
+compile: $(OUTDIR)/rsa
 
-# Source files
-SOURCES = main.cpp \
-          $(SRC_DIR)/core/RSA.cpp \
-          $(SRC_DIR)/helpers/Utils.cpp \
-          $(SRC_DIR)/helpers/FileManager.cpp
-
-# Object files
-OBJECTS = $(patsubst %.cpp, $(OUTDIR)/%.o, $(SOURCES))
-
-# Default target: Compile everything
-all: $(OUTDIR) $(OUTDIR)/src $(OUTDIR)/src/core $(OUTDIR)/src/helpers $(TARGET) test
-
-# Build the main program
-$(TARGET): $(OBJECTS)
+$(OUTDIR)/rsa: $(OUTDIR)/$(SOURCE_DIR)/main.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Compile each .cpp file into .o
-$(OUTDIR)/%.o: %.cpp | $(OUTDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+TEST_DIR = src/tests
+TEST_EXECUTABLES = $(OUTDIR)/$(TEST_DIR)/testUtils $(OUTDIR)/$(TEST_DIR)/testUtils
 
-$(OUTDIR)/src/core/%.o: $(SRC_DIR)/core/%.cpp | $(OUTDIR)/src/core
-	$(CC) $(CFLAGS) -c $< -o $@
+# Run All Tests
+test: clean $(TEST_EXECUTABLES)
+	./$(OUTDIR)/$(TEST_DIR)/testUtils
+	./$(OUTDIR)/$(TEST_DIR)/testRSA
 
-$(OUTDIR)/src/helpers/%.o: $(SRC_DIR)/helpers/%.cpp | $(OUTDIR)/src/helpers
-	$(CC) $(CFLAGS) -c $< -o $@
+# Run tests
+testUtils: clean $(OUTDIR)/$(TEST_DIR)/testUtils
+	./$(OUTDIR)/tests/testUtils
 
-# -----------------------
-# CREATE NECESSARY DIRECTORIES
-# -----------------------
-$(OUTDIR):
-	mkdir -p $(OUTDIR)
+testRSA: clean $(OUTDIR)/$(TEST_DIR)/testRSA
+	./$(OUTDIR)/tests/testRSA
 
-$(OUTDIR)/src:
-	mkdir -p $(OUTDIR)/src
-
-$(OUTDIR)/src/core:
-	mkdir -p $(OUTDIR)/src/core
-
-$(OUTDIR)/src/helpers:
-	mkdir -p $(OUTDIR)/src/helpers
-
-# -----------------------
-# TESTS
-# -----------------------
-# Test executables
-TEST_EXECUTABLES = $(OUTDIR)/testUtils $(OUTDIR)/testRSA
-
-test: $(TEST_EXECUTABLES)
-	$(OUTDIR)/testUtils
-	$(OUTDIR)/testRSA
-
-# Build testUtils
-$(OUTDIR)/testUtils: $(OUTDIR)/src/tests/testUtils.o $(OUTDIR)/src/helpers/Utils.o
+# Linking the test executable
+$(OUTDIR)/$(TEST_DIR)/testUtils: $(OUTDIR)/$(TEST_DIR)/testUtils.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Compile testUtils.cpp
-$(OUTDIR)/src/tests/testUtils.o: $(SRC_DIR)/tests/testUtils.cpp | $(OUTDIR)/src/tests
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OUTDIR)/$(TEST_DIR)/testUtils.o: $(TEST_DIR)/testUtils.cpp $(SOURCE_DIR)/helpers/Utils.h | $(OUTDIR)/$(TEST_DIR)
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
-# Build testRSA
-$(OUTDIR)/testRSA: $(OUTDIR)/src/tests/testRSA.o $(OUTDIR)/src/core/RSA.o $(OUTDIR)/src/helpers/Utils.o
+$(OUTDIR)/$(TEST_DIR)/testRSA: $(OUTDIR)/$(TEST_DIR)/testRSA.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Compile testRSA.cpp
-$(OUTDIR)/src/tests/testRSA.o: $(SRC_DIR)/tests/testRSA.cpp | $(OUTDIR)/src/tests
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OUTDIR)/$(TEST_DIR)/testRSA.o: $(TEST_DIR)/testRSA.cpp $(SOURCE_DIR)/core/RSA.h | $(OUTDIR)/$(TEST_DIR)
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
-$(OUTDIR)/src/tests:
-	mkdir -p $(OUTDIR)/src/tests
 
-# -----------------------
-# CLEAN BUILD FILES
-# -----------------------
+
+# Compile Source Files
+
+# Compile main.cpp
+$(OUTDIR)/$(SOURCE_DIR)/main.o: $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
+# Compile FileManager.cpp
+$(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o: $(SOURCE_DIR)/helpers/FileManager.cpp $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)/helpers
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
+# Compile Utils.cpp
+$(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o: $(SOURCE_DIR)/helpers/Utils.cpp $(SOURCE_DIR)/helpers/Utils.h | $(OUTDIR)/$(SOURCE_DIR)/helpers
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
+# Compile RSA.cpp
+$(OUTDIR)/$(SOURCE_DIR)/core/RSA.o: $(SOURCE_DIR)/core/RSA.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/Utils.h | $(OUTDIR)/$(SOURCE_DIR)/core
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
+
+# Create output directories if they don't exist
+$(OUTDIR):
+	mkdir -p $(OUTDIR)
+
+$(OUTDIR)/$(TEST_DIR): | $(OUTDIR)
+	mkdir -p $(OUTDIR)/$(TEST_DIR)
+
+$(OUTDIR)/$(SOURCE_DIR)/helpers: | $(OUTDIR)
+	mkdir -p $(OUTDIR)/$(SOURCE_DIR)/helpers
+
+$(OUTDIR)/$(SOURCE_DIR)/core: | $(OUTDIR)
+	mkdir -p $(OUTDIR)/$(SOURCE_DIR)/core
+
+
+# Clean output files
 clean:
 	rm -rf $(OUTDIR)
-
-# Run the main program
-run: $(TARGET)
-	./$(TARGET)

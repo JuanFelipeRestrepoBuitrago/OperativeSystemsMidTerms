@@ -2,6 +2,14 @@
 
 ## Requierements
 
+
+### Open SSL
+
+To install Open SSL, you can use the following commands:
+```bash
+sudo apt update && sudo apt install libssl-dev
+```
+
 ### Google Test
 This is a library that allows you to create and run tests for C++ programs. It is a part of the Google C++ Testing Framework.
 
@@ -43,8 +51,24 @@ make $OPTION
 ```
 
 Where `$OPTION` can be:
-- `all` or ``: Compiles the project.
+- `all`, `compile` or ``: Compiles the project. In a new out file called `out/rsa`.
 - `clean`: Removes the build directory.
-- `run`: Runs the project.
 - `test`: Runs the tests.
 - `testUtils`: Runs the tests for the Utils file.
+- `testRSA`: Runs the tests for the RSA file.
+
+## How to run
+
+To run the project, you have to follow the next steps:
+
+1. Compile the project.
+
+2. Run the following command:
+```bash
+./out/rsa --help
+```
+
+Or you can run the following command if you are in the out directory:
+```bash
+./rsa --help
+```
