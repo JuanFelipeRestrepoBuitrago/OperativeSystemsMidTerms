@@ -12,22 +12,28 @@ compile: $(OUTDIR)/rsa
 $(OUTDIR)/rsa: $(OUTDIR)/$(SOURCE_DIR)/main.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-TEST_DIR = src/tests
-TEST_EXECUTABLES = $(OUTDIR)/$(TEST_DIR)/testUtils $(OUTDIR)/$(TEST_DIR)/testUtils
+TEST_DIR = src/tests/core
+TEST_EXECUTABLES = $(OUTDIR)/$(TEST_DIR)/testUtils $(OUTDIR)/$(TEST_DIR)/testRSA $(OUTDIR)/$(TEST_DIR)/testRLE
+
 
 # Run All Tests
 test: clean $(TEST_EXECUTABLES)
 	./$(OUTDIR)/$(TEST_DIR)/testUtils
 	./$(OUTDIR)/$(TEST_DIR)/testRSA
+	./$(OUTDIR)/$(TEST_DIR)/testRLE
 
 # Run tests
 testUtils: clean $(OUTDIR)/$(TEST_DIR)/testUtils
-	./$(OUTDIR)/tests/testUtils
+	./$(OUTDIR)/$(TEST_DIR)/testUtils
 
 testRSA: clean $(OUTDIR)/$(TEST_DIR)/testRSA
-	./$(OUTDIR)/tests/testRSA
+	./$(OUTDIR)/$(TEST_DIR)/testRSA
 
-# Linking the test executable
+testRLE: clean $(OUTDIR)/$(TEST_DIR)/testRLE
+	./$(OUTDIR)/$(TEST_DIR)/testRLE
+
+
+
 $(OUTDIR)/$(TEST_DIR)/testUtils: $(OUTDIR)/$(TEST_DIR)/testUtils.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -35,7 +41,8 @@ $(OUTDIR)/$(TEST_DIR)/testUtils: $(OUTDIR)/$(TEST_DIR)/testUtils.o $(OUTDIR)/$(S
 $(OUTDIR)/$(TEST_DIR)/testUtils.o: $(TEST_DIR)/testUtils.cpp $(SOURCE_DIR)/helpers/Utils.h | $(OUTDIR)/$(TEST_DIR)
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
-$(OUTDIR)/$(TEST_DIR)/testRSA: $(OUTDIR)/$(TEST_DIR)/testRSA.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o
+
+$(OUTDIR)/$(TEST_DIR)/testRSA: $(OUTDIR)/$(TEST_DIR)/testRSA.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Compile testRSA.cpp
@@ -43,6 +50,12 @@ $(OUTDIR)/$(TEST_DIR)/testRSA.o: $(TEST_DIR)/testRSA.cpp $(SOURCE_DIR)/core/RSA.
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 
+$(OUTDIR)/$(TEST_DIR)/testRLE: $(OUTDIR)/$(TEST_DIR)/testRLE.o $(OUTDIR)/$(SOURCE_DIR)/core/RLE.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Compile testRLE.cpp
+$(OUTDIR)/$(TEST_DIR)/testRLE.o: $(TEST_DIR)/testRLE.cpp $(SOURCE_DIR)/core/RLE.h | $(OUTDIR)/$(TEST_DIR)
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile Source Files
 
@@ -59,8 +72,13 @@ $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o: $(SOURCE_DIR)/helpers/Utils.cpp $(SOURC
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile RSA.cpp
-$(OUTDIR)/$(SOURCE_DIR)/core/RSA.o: $(SOURCE_DIR)/core/RSA.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/Utils.h | $(OUTDIR)/$(SOURCE_DIR)/core
+$(OUTDIR)/$(SOURCE_DIR)/core/RSA.o: $(SOURCE_DIR)/core/RSA.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/Utils.h $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)/core
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
+# Compile RLE.cpp
+$(OUTDIR)/$(SOURCE_DIR)/core/RLE.o: $(SOURCE_DIR)/core/RLE.cpp $(SOURCE_DIR)/core/RLE.h $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)/core
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
 
 
 # Create output directories if they don't exist

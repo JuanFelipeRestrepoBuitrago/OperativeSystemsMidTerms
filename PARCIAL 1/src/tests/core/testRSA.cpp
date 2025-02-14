@@ -1,6 +1,10 @@
-#include "../helpers/Utils.h"
-#include "../core/RSA.h"
+#include "../../helpers/Utils.h"
+#include "../../core/RSA.h"
+#include "../../helpers/FileManager.h"
+
 #include <gtest/gtest.h>
+
+#define TEMPLATE_PATH "src/tests/messages/templateRSA.txt"
 
 using std::vector;
 using std::string;
@@ -26,7 +30,10 @@ TEST(RSATest, EncryptAndDecrypt) {
     Rsa rsa(7919, 1009);
     ResultGenerateKeys keys = rsa.generateKeys();
 
-    const char* message = "Hola Soy Pipe";
+    std::vector<char> vec = FileManager::readFile(TEMPLATE_PATH);
+    std::string str(vec.data());
+    const char* message = str.c_str();
+
     char* encryptedMessage = rsa.encrypt(message, keys.publicKey);
     char* decryptedMessage = rsa.decrypt(encryptedMessage, keys.privateKey);
 
