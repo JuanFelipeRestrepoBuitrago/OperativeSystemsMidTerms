@@ -35,7 +35,7 @@ ResultGenerateKeys Rsa::generateKeys() {
 
     // Choose e, where 1 < e < phi(n) and gcd(e, phi(n)) == 1
     for (e = 2; e < phi; e++) {
-        if (std::gcd(static_cast<unsigned int>(e), static_cast<unsigned int>(phi)) == 1) {
+        if (std::__gcd(static_cast<unsigned int>(e), static_cast<unsigned int>(phi)) == 1) {
             break;
         }
     }
