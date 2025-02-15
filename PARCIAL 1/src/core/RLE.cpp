@@ -62,17 +62,12 @@ std::vector<char> RLE::uncompress(const std::vector<char> &data) {
     std::vector<char> uncompressedMessage;
     size_t i = 0;
 
-    while (i < data.size()) {
-        int count = 0;
-        while (std::isdigit(data[i])) {
-            count = count * 10 + data[i] - '0';
-            i++;
-        }
-
-        char currentChar = data[i];
+    while (i < data.size()-1) {
+        int count = data[i] - '0';
+        char currentChar = data[i+1];
         uncompressedMessage.insert(uncompressedMessage.end(), count, currentChar);
 
-        i++;
+        i+=2;
     }
 
     return uncompressedMessage;
