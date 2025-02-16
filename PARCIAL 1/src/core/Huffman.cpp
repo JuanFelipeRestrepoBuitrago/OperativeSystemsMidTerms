@@ -56,18 +56,27 @@ std::vector<char> Huffman::compress(const std::vector<char> &data) {
     return compressedData;
 }
 
-std::vector<char> Huffman::uncompress(const std::vector<char> &data) {
+std::vector<char> Huffman::uncompress(const std::vector<char> &data, 
+    const std::unordered_map<std::string, char>* externalReverseCodes) {
+    
+    const std::unordered_map<std::string, char>& codesToUse = 
+        (externalReverseCodes) ? *externalReverseCodes : reverseCodes;
+
     std::string encodedStr(data.begin(), data.end());
     std::string decodedStr;
     std::string currentCode;
-    
+
     for (char bit : encodedStr) {
         currentCode += bit;
-        if (reverseCodes.count(currentCode)) {
-            decodedStr += reverseCodes[currentCode];
+        if (codesToUse.count(currentCode)) {
+            decodedStr += codesToUse.at(currentCode);
             currentCode.clear();
         }
     }
-    
+
     return std::vector<char>(decodedStr.begin(), decodedStr.end());
+}
+
+std::unordered_map<std::string, char> Huffman::getReverseCodes() {
+    return reverseCodes;
 }

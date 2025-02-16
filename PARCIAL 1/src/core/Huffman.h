@@ -29,10 +29,12 @@ public:
     void buildTree(const std::unordered_map<char, int> &freqMap);
     void generateCodes(Node *node, const std::string &code);
     void deleteTree(Node *node);
+    std::unordered_map<std::string, char> getReverseCodes();
     Huffman();
     ~Huffman();
     std::vector<char> compress(const std::vector<char> &data);
-    std::vector<char> uncompress(const std::vector<char> &data);
+    std::vector<char> uncompress(const std::vector<char> &data, 
+        const std::unordered_map<std::string, char>* externalReverseCodes = nullptr);    
 };
 
 #endif

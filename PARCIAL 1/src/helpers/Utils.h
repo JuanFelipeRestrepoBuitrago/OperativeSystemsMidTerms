@@ -12,6 +12,9 @@
 #include <openssl/bio.h>
 #include <openssl/evp.h>
 #include <openssl/buffer.h>
+#include <unordered_map>
+#include <sstream>
+#include "FileManager.h"
 
 class Utils {
 public:
@@ -26,6 +29,9 @@ public:
     static std::vector<uint8_t> base64ToBinary(const std::string& base64Str);
     static char* numbersToBase64(const std::vector<int>& numbers);
     static std::vector<int> base64ToNumbers(const char* base64CStr);
+    static std::unordered_map<char, int> createFreqMap(const std::vector<char>& data);
+    static void saveHuffmanTable(const std::unordered_map<std::string, char>& reverseCodes, const std::string& filename);
+    static std::unordered_map<std::string, char> loadHuffmanTable(const std::string& filename);
 };
 
 #endif // UTILS_H

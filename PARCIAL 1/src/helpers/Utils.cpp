@@ -241,3 +241,46 @@ std::vector<int> Utils::base64ToNumbers(const char* base64CStr) {
     // Deserialize the binary data into a vector of integers
     return Utils::deserializeNumbers(binaryData);
 }
+
+std::unordered_map<char, int> Utils::createFreqMap(const std::vector<char>& data) {
+    /**
+     * Function to create a frequency map of characters in a given data
+     * 
+     * @param data: The data to create the frequency map from
+     * 
+     * @return: The frequency map of characters in the input data
+     */
+    std::unordered_map<char, int> freqMap;
+    for (char ch : data) {
+        freqMap[ch]++;
+    }
+    return freqMap;
+}
+
+void Utils::saveHuffmanTable(const std::unordered_map<std::string, char>& reverseCodes, const std::string& filename) {
+    std::vector<char> data;
+
+    for (const auto& pair : reverseCodes) {
+        std::string entry = pair.first + " " + pair.second + "\n";
+        data.insert(data.end(), entry.begin(), entry.end());
+    }
+
+    FileManager::writeFile(filename, data);
+    std::cout << "Tabla Huffman guardada en " << filename << std::endl;
+}
+
+std::unordered_map<std::string, char> Utils::loadHuffmanTable(const std::string& filename) {
+    std::vector<char> data = FileManager::readFile(filename);
+    std::unordered_map<std::string, char> reverseCodes;
+    std::string content(data.begin(), data.end());
+    std::istringstream stream(content);
+    std::string code;
+    char character;
+
+    while (stream >> code >> character) {
+        reverseCodes[code] = character;
+    }
+
+    std::cout << "Tabla Huffman cargada desde " << filename << std::endl;
+    return reverseCodes;
+}
