@@ -1,5 +1,5 @@
-# RSA Encryption with Run-Length Encoding (RLE)
-For the exam of operating systems subject we created a system function that uses system calls to encrypt files using RSA and compress them using RLE.
+# RSA Encryption with Run-Length Encoding (Huffman)
+For the exam of operating systems subject we created a system function that uses system calls to encrypt files using RSA and compress them using Huffman.
 
 ## Background
 
@@ -27,31 +27,8 @@ The **RSA (Rivest-Shamir-Adleman)** algorithm is an **asymmetric cryptographic s
     ```
 RSA provides **strong security** but generates large ciphertexts, making **compression** useful before or after encryption.
 
-### Run-Length Encoding (RLE)
-**Run-Length Encoding (RLE)** is a simple **lossless compression algorithm** that replaces sequences of repeated characters with a count followed by the character itself.
-
-#### ⚙️ **How RLE Works**
-- **Example:**
-    ```
-    Input: "AAABBBCCDAA" Output: "3A3B2C1D2A"
-    ```
-- RLE is **efficient for data with repeated patterns**, but **not effective for highly random data**.
-
-## **How RLE is Used in RSA**
-Since RSA produces **long ciphertexts**, we use **RLE compression** to optimize the encrypted file size. The workflow is as follows:
-
-1. **Encryption Phase:**
- - Convert plaintext to a numerical representation.
- - Encrypt the message using **RSA**.
- - Apply **RLE compression** to reduce the ciphertext size.
- - Store the compressed ciphertext.
-
-2. **Decryption Phase:**
- - Retrieve the compressed ciphertext.
- - **Decompress** it using **RLE**.
- - Decrypt the data using **RSA** to obtain the original plaintext.
-
-This integration **optimizes storage** and **reduces transmission overhead** without compromising security.
+### Huffman Encoding
+#### ⚙️ **How Huffman Works**
 
 ## 📂 **FileManager: Handling File Operations**
 The **FileManager** module is responsible for managing system-level file operations, including reading and writing files securely. It uses **low-level system calls (`open`, `read`, `write`, `close`)** to handle files efficiently.
@@ -122,7 +99,7 @@ Where `$OPTION` can be:
 - `test`: Runs the tests.
 - `testUtils`: Runs the tests for the Utils file.
 - `testRSA`: Runs the tests for the RSA file.
-- `testRLE`: Runs the tests for the RLE file.
+- `testHuffman`: Runs the tests for the Huffman file.
 
 ## How to run
 

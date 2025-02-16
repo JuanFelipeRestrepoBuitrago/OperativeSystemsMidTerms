@@ -9,18 +9,18 @@ OUTDIR = out
 all: $(OUTDIR)/rsa
 compile: $(OUTDIR)/rsa
 
-$(OUTDIR)/rsa: $(OUTDIR)/$(SOURCE_DIR)/main.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o $(OUTDIR)/$(SOURCE_DIR)/core/RLE.o
+$(OUTDIR)/rsa: $(OUTDIR)/$(SOURCE_DIR)/main.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o $(OUTDIR)/$(SOURCE_DIR)/core/Huffman.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 TEST_DIR = src/tests/core
-TEST_EXECUTABLES = $(OUTDIR)/$(TEST_DIR)/testUtils $(OUTDIR)/$(TEST_DIR)/testRSA $(OUTDIR)/$(TEST_DIR)/testRLE
+TEST_EXECUTABLES = $(OUTDIR)/$(TEST_DIR)/testUtils $(OUTDIR)/$(TEST_DIR)/testRSA $(OUTDIR)/$(TEST_DIR)/testHuffman
 
 
 # Run All Tests
 test: clean $(TEST_EXECUTABLES)
 	./$(OUTDIR)/$(TEST_DIR)/testUtils
 	./$(OUTDIR)/$(TEST_DIR)/testRSA
-	./$(OUTDIR)/$(TEST_DIR)/testRLE
+	./$(OUTDIR)/$(TEST_DIR)/testHuffman
 
 # Run tests
 testUtils: clean $(OUTDIR)/$(TEST_DIR)/testUtils
@@ -29,8 +29,8 @@ testUtils: clean $(OUTDIR)/$(TEST_DIR)/testUtils
 testRSA: clean $(OUTDIR)/$(TEST_DIR)/testRSA
 	./$(OUTDIR)/$(TEST_DIR)/testRSA
 
-testRLE: clean $(OUTDIR)/$(TEST_DIR)/testRLE
-	./$(OUTDIR)/$(TEST_DIR)/testRLE
+testHuffman: clean $(OUTDIR)/$(TEST_DIR)/testHuffman
+	./$(OUTDIR)/$(TEST_DIR)/testHuffman
 
 
 
@@ -50,11 +50,11 @@ $(OUTDIR)/$(TEST_DIR)/testRSA.o: $(TEST_DIR)/testRSA.cpp $(SOURCE_DIR)/core/RSA.
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 
-$(OUTDIR)/$(TEST_DIR)/testRLE: $(OUTDIR)/$(TEST_DIR)/testRLE.o $(OUTDIR)/$(SOURCE_DIR)/core/RLE.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o
+$(OUTDIR)/$(TEST_DIR)/testHuffman: $(OUTDIR)/$(TEST_DIR)/testHuffman.o $(OUTDIR)/$(SOURCE_DIR)/core/Huffman.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-# Compile testRLE.cpp
-$(OUTDIR)/$(TEST_DIR)/testRLE.o: $(TEST_DIR)/testRLE.cpp $(SOURCE_DIR)/core/RLE.h | $(OUTDIR)/$(TEST_DIR)
+# Compile testHuffman.cpp
+$(OUTDIR)/$(TEST_DIR)/testHuffman.o: $(TEST_DIR)/testHuffman.cpp $(SOURCE_DIR)/core/Huffman.h | $(OUTDIR)/$(TEST_DIR)
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile Source Files
@@ -75,8 +75,8 @@ $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o: $(SOURCE_DIR)/helpers/Utils.cpp $(SOURC
 $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o: $(SOURCE_DIR)/core/RSA.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/Utils.h $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)/core
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
-# Compile RLE.cpp
-$(OUTDIR)/$(SOURCE_DIR)/core/RLE.o: $(SOURCE_DIR)/core/RLE.cpp $(SOURCE_DIR)/core/RLE.h $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)/core
+# Compile Huffman.cpp
+$(OUTDIR)/$(SOURCE_DIR)/core/Huffman.o: $(SOURCE_DIR)/core/Huffman.cpp $(SOURCE_DIR)/core/Huffman.h $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)/core
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 

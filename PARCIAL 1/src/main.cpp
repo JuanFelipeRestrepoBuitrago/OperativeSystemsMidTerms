@@ -84,9 +84,9 @@ int main(int argc, char* argv[]) {
 
         ResultGenerateKeys keys = rsa_management.generateKeys();
         FileManager::writeFile(defaultPublicKeyPath, 
-            std::vector<char>(keys.publicKey, keys.publicKey + std::strlen(keys.publicKey)));
+            std::vector<char>(keys.publicKey, keys.publicKey + std::stHuffmann(keys.publicKey)));
         FileManager::writeFile(defaultPrivateKeyPath, 
-            std::vector<char>(keys.privateKey, keys.privateKey + std::strlen(keys.privateKey)));
+            std::vector<char>(keys.privateKey, keys.privateKey + std::stHuffmann(keys.privateKey)));
         std::cout << "Public and private keys generated successfully --------------" << std::endl;
         return 0;
     } 
