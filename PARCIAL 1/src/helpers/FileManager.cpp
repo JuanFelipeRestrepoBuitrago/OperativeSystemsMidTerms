@@ -1,7 +1,14 @@
 #include "FileManager.h"
 #include <iostream>
 
-std::vector<char> FileManager::readFile(const std::string& filePath) {
+std::vector<char> FileManager::readTextFile(const std::string& filePath) {
+    /**
+     * Function to read the contents of a file
+     * 
+     * @param filePath: The path of the file to be read
+     * 
+     * @return: A vector containing the file contents as characters
+     */
     int fd = open(filePath.c_str(), O_RDONLY); // Open the file in read-only mode
     if (fd == -1) {
         perror("Error opening file for reading");
@@ -24,7 +31,15 @@ std::vector<char> FileManager::readFile(const std::string& filePath) {
     return buffer;
 }
 
-void FileManager::writeFile(const std::string& filePath, const std::vector<char>& data) {
+void FileManager::writeTextFile(const std::string& filePath, const std::vector<char>& data) {
+    /**
+     * Function to write data to a file
+     * 
+     * @param filePath: The path of the file to be written to
+     * @param data: The data to be written to the file
+     * 
+     * @return: None
+     */
     int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644); // Open the file for writing, create if not exists, truncate if exists
     if (fd == -1) {
         perror("Error opening file for writing");
@@ -40,7 +55,15 @@ void FileManager::writeFile(const std::string& filePath, const std::vector<char>
     close(fd);
 }
 
-void FileManager::writeBits(const std::string& filePath, const std::vector<char>& data) {
+void FileManager::writeBinaryFile(const std::string& filePath, const std::vector<char>& data) {
+    /**
+     * Function to write compressed bit data to a file
+     * 
+     * @param filePath: The path of the file where the bit data will be written
+     * @param data: The compressed data to be written
+     * 
+     * @return: None
+     */
     int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd == -1) {
         perror("Error opening file for writing");
@@ -67,7 +90,6 @@ void FileManager::writeBits(const std::string& filePath, const std::vector<char>
         }
     }
     
-
     if (bitCount > 0) {
         currentByte <<= (8 - bitCount);
         byteData.push_back(currentByte);
@@ -77,7 +99,14 @@ void FileManager::writeBits(const std::string& filePath, const std::vector<char>
     close(fd);
 }
 
-std::vector<char> FileManager::readBits(const std::string& filePath) {
+std::vector<char> FileManager::readBinaryFile(const std::string& filePath) {
+    /**
+     * Function to read compressed bit data from a file
+     * 
+     * @param filePath: The path of the file from which the bit data will be read
+     * 
+     * @return: A vector containing the decompressed bit data
+     */
     int fd = open(filePath.c_str(), O_RDONLY);
     if (fd == -1) {
         perror("Error opening file for reading");

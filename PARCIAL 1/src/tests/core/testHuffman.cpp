@@ -21,7 +21,7 @@ TEST(HuffmanTest, CompressAndUncompress) {
     };
     huffman.buildTree(freqMap);
 
-    std::vector<char> message = FileManager::readFile(TEMPLATE_PATH);
+    std::vector<char> message = FileManager::readTextFile(TEMPLATE_PATH);
 
     std::vector<char> compressedMessage = huffman.compress(message);
     std::vector<char> uncompressedMessage = huffman.uncompress(compressedMessage);

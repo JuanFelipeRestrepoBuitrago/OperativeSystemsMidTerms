@@ -258,6 +258,14 @@ std::unordered_map<char, int> Utils::createFreqMap(const std::vector<char>& data
 }
 
 void Utils::saveHuffmanTable(const std::unordered_map<std::string, char>& reverseCodes, const std::string& filename) {
+    /**
+     * Function to save the Huffman table to a file
+     * 
+     * @param reverseCodes: A map containing Huffman codes and their corresponding characters
+     * @param filename: The name of the file where the Huffman table will be saved
+     * 
+     * @return: None
+     */
     std::vector<char> data;
 
     for (const auto& pair : reverseCodes) {
@@ -265,12 +273,18 @@ void Utils::saveHuffmanTable(const std::unordered_map<std::string, char>& revers
         data.insert(data.end(), entry.begin(), entry.end());
     }
 
-    FileManager::writeFile(filename, data);
-    std::cout << "Tabla Huffman guardada en " << filename << std::endl;
+    FileManager::writeTextFile(filename, data);
 }
 
 std::unordered_map<std::string, char> Utils::loadHuffmanTable(const std::string& filename) {
-    std::vector<char> data = FileManager::readFile(filename);
+    /**
+     * Function to load the Huffman table from a file
+     * 
+     * @param filename: The name of the file from which to load the Huffman table
+     * 
+     * @return: A map containing Huffman codes and their corresponding characters
+     */
+    std::vector<char> data = FileManager::readTextFile(filename);
     std::unordered_map<std::string, char> reverseCodes;
     std::string content(data.begin(), data.end());
     std::istringstream stream(content);
@@ -281,6 +295,5 @@ std::unordered_map<std::string, char> Utils::loadHuffmanTable(const std::string&
         reverseCodes[code] = character;
     }
 
-    std::cout << "Tabla Huffman cargada desde " << filename << std::endl;
     return reverseCodes;
 }
