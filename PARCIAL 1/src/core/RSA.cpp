@@ -30,7 +30,7 @@ ResultGenerateKeys Rsa::generateKeys() {
     int n, e;
 
     // Calculate the Euler's Totient Function of n
-    n = this->p * q;
+    n = this -> p * this -> q;
     int phi = (this->p - 1) * (this->q - 1);
 
     // Choose e, where 1 < e < phi(n) and gcd(e, phi(n)) == 1
