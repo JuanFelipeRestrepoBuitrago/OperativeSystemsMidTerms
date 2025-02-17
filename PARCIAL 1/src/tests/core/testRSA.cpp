@@ -30,7 +30,7 @@ TEST(RSATest, EncryptAndDecrypt) {
     Rsa rsa(7919, 1009);
     ResultGenerateKeys keys = rsa.generateKeys();
 
-    std::vector<char> vec = FileManager::readFile(TEMPLATE_PATH);
+    std::vector<char> vec = FileManager::readTextFile(TEMPLATE_PATH);
     std::string str(vec.data());
     const char* message = str.c_str();
 

@@ -241,3 +241,59 @@ std::vector<int> Utils::base64ToNumbers(const char* base64CStr) {
     // Deserialize the binary data into a vector of integers
     return Utils::deserializeNumbers(binaryData);
 }
+
+std::unordered_map<char, int> Utils::createFreqMap(const std::vector<char>& data) {
+    /**
+     * Function to create a frequency map of characters in a given data
+     * 
+     * @param data: The data to create the frequency map from
+     * 
+     * @return: The frequency map of characters in the input data
+     */
+    std::unordered_map<char, int> freqMap;
+    for (char ch : data) {
+        freqMap[ch]++;
+    }
+    return freqMap;
+}
+
+void Utils::saveHuffmanTable(const std::unordered_map<std::string, char>& reverseCodes, const std::string& filename) {
+    /**
+     * Function to save the Huffman table to a file
+     * 
+     * @param reverseCodes: A map containing Huffman codes and their corresponding characters
+     * @param filename: The name of the file where the Huffman table will be saved
+     * 
+     * @return: None
+     */
+    std::vector<char> data;
+
+    for (const auto& pair : reverseCodes) {
+        std::string entry = pair.first + " " + pair.second + "\n";
+        data.insert(data.end(), entry.begin(), entry.end());
+    }
+
+    FileManager::writeTextFile(filename, data);
+}
+
+std::unordered_map<std::string, char> Utils::loadHuffmanTable(const std::string& filename) {
+    /**
+     * Function to load the Huffman table from a file
+     * 
+     * @param filename: The name of the file from which to load the Huffman table
+     * 
+     * @return: A map containing Huffman codes and their corresponding characters
+     */
+    std::vector<char> data = FileManager::readTextFile(filename);
+    std::unordered_map<std::string, char> reverseCodes;
+    std::string content(data.begin(), data.end());
+    std::istringstream stream(content);
+    std::string code;
+    char character;
+
+    while (stream >> code >> character) {
+        reverseCodes[code] = character;
+    }
+
+    return reverseCodes;
+}
