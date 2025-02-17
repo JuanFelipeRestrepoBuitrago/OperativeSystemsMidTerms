@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
         std::unordered_map<char, int> freqMap = Utils::createFreqMap(messageContent);
         huffman.buildTree(freqMap);
         std::vector<char> compressedMessage = huffman.compress(messageContent);
-        FileManager::writeFile(compressedMessagePath, compressedMessage);
+        FileManager::writeBits(compressedMessagePath, compressedMessage);
         std::cout << "Message of " << compressedMessage.size() << " bytes compressed successfully in " << compressedMessagePath << std::endl;
 
         std::unordered_map<std::string, char> reverseCodes = huffman.getReverseCodes();
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     
-        std::vector<char> messageContent = FileManager::readFile(argv[2]);
+        std::vector<char> messageContent = FileManager::readBits(argv[2]);
         std::unordered_map<std::string, char> reverseCodes = Utils::loadHuffmanTable(huffmanTablePath);
         std::vector<char> decompressedMessage = huffman.uncompress(messageContent, &reverseCodes);
         FileManager::writeFile(decompressedMessagePath, decompressedMessage);
