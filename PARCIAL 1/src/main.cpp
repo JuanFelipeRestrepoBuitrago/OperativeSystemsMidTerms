@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    else if (option == "--descompress" || option == "-x") {
+    else if (option == "--decompress" || option == "-x") {
         /**
          * Decompress a file using Huffman encoding
          */
