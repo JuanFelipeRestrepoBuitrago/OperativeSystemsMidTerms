@@ -28,7 +28,14 @@ The **RSA (Rivest-Shamir-Adleman)** algorithm is an **asymmetric cryptographic s
 RSA provides **strong security** but generates large ciphertexts, making **compression** useful before or after encryption.
 
 ### Huffman Encoding
+The Huffman algorithm is a lossless data compression method based on character frequency in a file.
 #### ⚙️ **How Huffman Works**
+1. The frequency of each character in the file is calculated.
+2. A Huffman tree is built, where the least frequent characters have longer codes, and the most frequent ones have shorter codes.
+3. A unique binary code is generated for each character based on the tree.
+4. The original file is compress by replacing each character with its Huffman code.
+
+The Huffman tree is stored also to allow later decompress.
 
 ## 📂 **FileManager: Handling File Operations**
 The **FileManager** module is responsible for managing system-level file operations, including reading and writing files securely. It uses **low-level system calls (`open`, `read`, `write`, `close`)** to handle files efficiently.
