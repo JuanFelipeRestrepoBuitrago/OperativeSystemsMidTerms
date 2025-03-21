@@ -5,6 +5,13 @@
 #include <unistd.h>     // read(), write(), close()
 #include <string>
 #include "BuddyAllocator.h"
+#include "../utils/Utils.h"
+#include "../standardImage/stb_image.h"
+#include "../standardImage/stb_image_write.h"
+#include <iostream>
+#include <fstream>
+#include <cstring>
+
 
 enum class TransformationMethod {
     ROTATION,   // Rotate the image
@@ -23,17 +30,43 @@ private:
     unsigned char** originalPixels;
     unsigned char** transformedPixels;
     bool buddyAllocatorUsage;
+    double* scaleFactor;
 
-    unsigned char** allocateMemory(int width, int height);
-    void deallocateMemory(unsigned char** pixels, int height);
+    unsigned char** allocateMemory(int width, int height, BuddyAllocator* allocator);
+    void deallocateMemory(unsigned char** pixels);
 public:
     FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage);
+    FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double* scaleFactor);
     ~FileManager();
 
-    unsigned char** getOriginalPixelsFromFile();
-    unsigned char** getTransformedPixels();
-    void saveImage(unsigned char*** data);
+    unsigned char** initializeOriginalPixelsFromFile();
+    unsigned char** initializeTransformedPixels();
+    void saveImage(unsigned char** data);
     void getFileMetadata();
+
+    // Getters and setters
+    std::string getReadFilePath() { return readFilePath; }
+    std::string getWriteFilePath() { return writeFilePath; }
+    TransformationMethod getTransformationMethod() { return transformationMethod; }
+    int getWidth() { return width; }
+    int getHeight() { return height; }
+    unsigned char** getOriginalPixels() { return originalPixels; }
+    unsigned char** getTransformedPixels() { return transformedPixels; }
+    BuddyAllocator* getAllocatorOriginalImage() { return allocatorOriginalImage; }
+    BuddyAllocator* getAllocatorTransformedImage() { return allocatorTransformedImage; }
+    bool getBuddyAllocatorUsage() { return buddyAllocatorUsage; }
+    double* getScaleFactor() { return scaleFactor; }
+    void setOriginalPixels(unsigned char** pixels) { originalPixels = pixels; }
+    void setTransformedPixels(unsigned char** pixels) { transformedPixels = pixels; }
+    void setAllocatorOriginalImage(BuddyAllocator* allocator) { allocatorOriginalImage = allocator; }
+    void setAllocatorTransformedImage(BuddyAllocator* allocator) { allocatorTransformedImage = allocator; }
+    void setBuddyAllocatorUsage(bool usage) { buddyAllocatorUsage = usage; }
+    void setScaleFactor(double* factor) { scaleFactor = factor; }
+    void setWidth(int w) { width = w; }
+    void setHeight(int h) { height = h; }
+    void setReadFilePath(const std::string& path) { readFilePath = path; }
+    void setWriteFilePath(const std::string& path) { writeFilePath = path; }
+    void setTransformationMethod(TransformationMethod method) { transformationMethod = method; }
 };
 
 #endif
