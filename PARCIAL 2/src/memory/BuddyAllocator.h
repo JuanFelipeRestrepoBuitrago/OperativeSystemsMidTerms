@@ -2,6 +2,9 @@
 #define BUDDY_ALLOCATOR_H
 
 #include <cstddef>
+#include "utils/Utils.h"
+#include <cstdlib>
+#include <iostream>
 
 class BuddyAllocator {
 public:

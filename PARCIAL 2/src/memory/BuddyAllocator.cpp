@@ -1,7 +1,4 @@
 #include "BuddyAllocator.h"
-#include "utils/Utils.h"
-#include <cstdlib>
-#include <iostream>
 
 using namespace std;
 

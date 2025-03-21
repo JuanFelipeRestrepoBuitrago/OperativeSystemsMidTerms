@@ -33,7 +33,7 @@ public:
     unsigned char** getOriginalPixelsFromFile();
     unsigned char** getTransformedPixels();
     void saveImage(unsigned char*** data);
-    void saveFileMetadata();
+    void getFileMetadata();
 };
 
 #endif
