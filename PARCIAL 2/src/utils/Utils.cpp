@@ -35,3 +35,17 @@ size_t Utils::getSizeImageScaled(int width, int height, double scale) {
 
     return newWidth * newHeight;
 }
+
+
+size_t Utils::roundToNextPowerOfTwo(size_t size) {
+    /**
+     * Round the given size to the next power of two.
+     * 
+     * @param size: The size to be rounded.
+     * @return The next power of two greater than or equal to the given size.
+     */
+    if (size == 0) return 1;
+    size_t power = 1;
+    while (power < size) power <<= 1; // Equivalent to power *= 2
+    return power;
+}

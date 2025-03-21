@@ -1,37 +1,44 @@
 #include "BuddyAllocator.h"
+#include "utils/Utils.h"
 #include <cstdlib>
 #include <iostream>
 
 using namespace std;
 
-// Constructor: asigna un bloque de memoria de tamaño especificado usando malloc.
 BuddyAllocator::BuddyAllocator(size_t size) {
-    this->size = size;
-    baseMemory = std::malloc(size);
+    /**
+     * Constructor for the BuddyAllocator class. Assigns a memory block of the specified size.
+     * 
+     * @param size: The size of the memory block to be managed.
+     */
+    this->size = Utils::roundToNextPowerOfTwo(size); // Force initial size to be a power of two
+    baseMemory = std::malloc(this->size);
     if (!baseMemory) {
-        cerr << "Error: No se pudo asignar memoria base con Buddy System.\n";
+        cerr << "Error: Memory allocation failed.\n";
         exit(1);
     }
 }
 
-// Destructor: libera el bloque de memoria.
 BuddyAllocator::~BuddyAllocator() {
+    /**
+     * Destructor for the BuddyAllocator class. Frees the memory block.
+     */
     std::free(baseMemory);
 }
 
-// Asigna un bloque de memoria del tamaño especificado.
-// Si el tamaño solicitado supera el bloque disponible, devuelve nullptr.
 void* BuddyAllocator::alloc(size_t size) {
-    if (size > this->size) {
-        cerr << "Error: Tamaño solicitado (" << size 
-             << " bytes) supera el tamaño disponible (" 
+    /**
+     * Allocate a block of memory of the specified size.
+     * 
+     * @param size: The size of the memory block to be allocated.
+     * @return A pointer to the allocated memory block.
+     */
+    size_t roundedSize = Utils::roundToNextPowerOfTwo(size);
+    if (roundedSize > this->size) {
+        cerr << "Error: Requested size (" << roundedSize 
+             << " bytes) exceeds allocator capacity (" 
              << this->size << " bytes).\n";
         return nullptr;
     }
-    return baseMemory;
-}
-
-// Libera el bloque de memoria (sin efecto en esta implementación).
-void BuddyAllocator::free(void* ptr) {
-    // No liberamos porque el Buddy System maneja esto automáticamente.
+    return baseMemory; // Simplified for single-block allocation
 }

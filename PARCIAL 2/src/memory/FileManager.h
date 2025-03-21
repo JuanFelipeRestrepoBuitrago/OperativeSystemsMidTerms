@@ -18,7 +18,8 @@ private:
     TransformationMethod transformationMethod;
     int width;
     int height;
-    BuddyAllocator* allocator;
+    BuddyAllocator* allocatorOriginalImage;
+    BuddyAllocator* allocatorTransformedImage;
     unsigned char** originalPixels;
     unsigned char** transformedPixels;
     bool buddyAllocatorUsage;
@@ -26,7 +27,7 @@ private:
     unsigned char** allocateMemory(int width, int height);
     void deallocateMemory(unsigned char** pixels, int height);
 public:
-    FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, BuddyAllocator* allocator, bool buddyAllocatorUsage);
+    FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage);
     ~FileManager();
 
     unsigned char** getOriginalPixelsFromFile();
