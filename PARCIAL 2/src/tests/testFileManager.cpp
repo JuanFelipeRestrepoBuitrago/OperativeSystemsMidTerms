@@ -69,8 +69,8 @@ TEST_F(FileManagerTest, RotationTransformation) {
     ASSERT_NE(transformed, nullptr);
     
     // Verify new dimensions (calculated by rotation logic)
-    EXPECT_GT(fm.getWidth(), 2);
-    EXPECT_GT(fm.getHeight(), 2);
+    EXPECT_GT(fm.getTransformedImageWidth(), 2);
+    EXPECT_GT(fm.getTransformedImageHeight(), 2);
 }
 
 TEST_F(FileManagerTest, ScalingTransformation) {
@@ -83,8 +83,8 @@ TEST_F(FileManagerTest, ScalingTransformation) {
     
     // Add assertion to use the variable
     ASSERT_NE(transformed, nullptr);
-    EXPECT_EQ(fm.getWidth(), 4);
-    EXPECT_EQ(fm.getHeight(), 4);
+    EXPECT_EQ(fm.getTransformedImageWidth(), 4);
+    EXPECT_EQ(fm.getTransformedImageHeight(), 4);
 }
 
 TEST_F(FileManagerTest, SaveTransformedImage) {
@@ -125,14 +125,14 @@ TEST_F(FileManagerTest, BuddyAllocatorUsage) {
 }
 
 TEST_F(FileManagerTest, MemoryDeallocation) {
+    double scale = 1.0;  // Or any valid scaling factor
     {
         FileManager fm(test_input, test_output,
-                      TransformationMethod::SCALING, true);
+                      TransformationMethod::SCALING, true, &scale);
         fm.initializeOriginalPixelsFromFile();
         fm.initializeTransformedPixels();
     } // Destructor called here
-    
-    // Verify no memory leaks (would need valgrind/sanitizers)
+
     SUCCEED();
 }
 

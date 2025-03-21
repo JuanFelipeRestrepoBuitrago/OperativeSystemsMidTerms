@@ -25,6 +25,8 @@ private:
     TransformationMethod transformationMethod;
     int width;
     int height;
+    int transformedImageWidth;
+    int transformedImageHeight;
     BuddyAllocator* allocatorOriginalImage;
     BuddyAllocator* allocatorTransformedImage;
     unsigned char** originalPixels;
@@ -33,7 +35,7 @@ private:
     double* scaleFactor;
 
     unsigned char** allocateMemory(int width, int height, BuddyAllocator* allocator);
-    void deallocateMemory(unsigned char** pixels);
+    void deallocateMemory(unsigned char** pixels, int height);
 public:
     FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage);
     FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double* scaleFactor);
@@ -50,6 +52,8 @@ public:
     TransformationMethod getTransformationMethod() { return transformationMethod; }
     int getWidth() { return width; }
     int getHeight() { return height; }
+    int getTransformedImageWidth() { return transformedImageWidth; }
+    int getTransformedImageHeight() { return transformedImageHeight; }
     unsigned char** getOriginalPixels() { return originalPixels; }
     unsigned char** getTransformedPixels() { return transformedPixels; }
     BuddyAllocator* getAllocatorOriginalImage() { return allocatorOriginalImage; }
@@ -64,6 +68,8 @@ public:
     void setScaleFactor(double* factor) { scaleFactor = factor; }
     void setWidth(int w) { width = w; }
     void setHeight(int h) { height = h; }
+    void setTransformedImageWidth(int w) { transformedImageWidth = w; }
+    void setTransformedImageHeight(int h) { transformedImageHeight = h; }
     void setReadFilePath(const std::string& path) { readFilePath = path; }
     void setWriteFilePath(const std::string& path) { writeFilePath = path; }
     void setTransformationMethod(TransformationMethod method) { transformationMethod = method; }

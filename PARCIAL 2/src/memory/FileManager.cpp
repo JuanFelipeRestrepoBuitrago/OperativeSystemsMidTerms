@@ -20,6 +20,8 @@ FileManager::FileManager(const std::string& readFilePath, const std::string& wri
     this -> scaleFactor = nullptr;
     this -> width = 0;
     this -> height = 0;
+    this -> transformedImageWidth = 0;
+    this -> transformedImageHeight = 0;
 }
 
 FileManager::FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double* scaleFactor) {
@@ -43,23 +45,32 @@ FileManager::FileManager(const std::string& readFilePath, const std::string& wri
     this -> scaleFactor = scaleFactor;
     this -> width = 0;
     this -> height = 0;
+    this -> transformedImageWidth = 0;
+    this -> transformedImageHeight = 0;
 }
 
 FileManager::~FileManager() {
     /**
      * Destructor for the FileManager class.
      */
-    // Only deallocate if pointers are valid
+    // Deallocate original image memory
     if (allocatorOriginalImage) {
         delete allocatorOriginalImage;
-    } else if (originalPixels != nullptr) { // Add null check
-        deallocateMemory(originalPixels);
+        allocatorOriginalImage = nullptr;
+        originalPixels = nullptr; // Avoid dangling pointer
+    } else if (originalPixels != nullptr) {
+        deallocateMemory(originalPixels, height);
+        originalPixels = nullptr;
     }
-    
+
+    // Deallocate transformed image memory
     if (allocatorTransformedImage) {
         delete allocatorTransformedImage;
-    } else if (transformedPixels != nullptr) { // Add null check
-        deallocateMemory(transformedPixels);
+        allocatorTransformedImage = nullptr;
+        transformedPixels = nullptr; // Avoid dangling pointer
+    } else if (transformedPixels != nullptr) {
+        deallocateMemory(transformedPixels, transformedImageHeight);
+        transformedPixels = nullptr;
     }
 }
 
@@ -96,14 +107,15 @@ unsigned char** FileManager::allocateMemory(int width, int height, BuddyAllocato
     }
 }
 
-void FileManager::deallocateMemory(unsigned char** pixels) {
+void FileManager::deallocateMemory(unsigned char** pixels, int height) {
     /**
      * Deallocate the memory used by the pixels of the image.
      * 
      * @param pixels: The pointer to the memory to be deallocated.
+     * @param height: The height of the image.
      */
-    size_t length = sizeof(pixels) / sizeof(pixels[0]);
-    for (int i = 0; i < length; ++i) {
+    if (pixels == nullptr || height <= 0) return;
+    for (int i = 0; i < height; i++) {
         delete[] pixels[i];
     }
     delete[] pixels;
@@ -154,23 +166,27 @@ unsigned char** FileManager::initializeTransformedPixels() {
      * 
      * @return A pointer to the pixels of the transformed image.
      */
-    if(width == 0 || height == 0) {
-        getFileMetadata();
-    }
+    transformedImageWidth = width;
+    transformedImageHeight = height;
+
     switch (transformationMethod) {
         case TransformationMethod::ROTATION:
-            Utils::getSizeImageRotated(width, height);
+            Utils::getSizeImageRotated(transformedImageWidth, transformedImageHeight);
             break;
         case TransformationMethod::SCALING:
-            Utils::getSizeImageScaled(width, height, *scaleFactor);
+            if (scaleFactor == nullptr) {
+                std::cerr << "Error: Scale factor is not provided.\n";
+                exit(1);
+            }
+            Utils::getSizeImageScaled(transformedImageWidth, transformedImageHeight, *scaleFactor);
             break;
     }
 
     if (buddyAllocatorUsage) {
-        allocatorTransformedImage = new BuddyAllocator(height * sizeof(unsigned char*) + height * width * sizeof(unsigned char));
+        allocatorTransformedImage = new BuddyAllocator(transformedImageHeight * sizeof(unsigned char*) + transformedImageHeight * transformedImageWidth * sizeof(unsigned char));
     }
 
-    transformedPixels = allocateMemory(width, height, allocatorTransformedImage);
+    transformedPixels = allocateMemory(transformedImageWidth, transformedImageHeight, allocatorTransformedImage);
 
     return transformedPixels;
 }
@@ -181,14 +197,14 @@ void FileManager::saveImage(unsigned char** data) {
      * 
      * @param data: The pointer to the pixels of the transformed image.
      */
-    unsigned char* buffer = new unsigned char[width * height];
-    for (int i = 0; i < height; i++) {
-        for (int j = 0; j < width; j++) {
-            buffer[i * width + j] = data[i][j];
+    unsigned char* buffer = new unsigned char[transformedImageWidth * transformedImageHeight];
+    for (int i = 0; i < transformedImageHeight; i++) {
+        for (int j = 0; j < transformedImageWidth; j++) {
+            buffer[i * transformedImageWidth + j] = data[i][j];
         }
     }
 
-    if (!stbi_write_png(writeFilePath.c_str(), width, height, 1, buffer, width)) {
+    if (!stbi_write_png(writeFilePath.c_str(), transformedImageWidth, transformedImageHeight, 1, buffer, transformedImageWidth)) {
         std::cerr << "Error: Could not write image to file.\n";
         delete[] buffer;
         exit(1);
