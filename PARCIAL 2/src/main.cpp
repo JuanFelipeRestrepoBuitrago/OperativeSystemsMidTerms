@@ -1,7 +1,9 @@
 #include "memory/FileManager.h"
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <chrono>
 #include <cstring>
+#include <cmath>
 
 using namespace std;
 using namespace std::chrono;
@@ -23,6 +25,7 @@ void mostrarListaChequeo(const string &archivoEntrada, const string &archivoSali
     cout << "Assignment Mode: " << (usarBuddy ? "Buddy System" : "new/delete") << endl;
     cout << "------------------------" << endl;
 }
+
 
 int main(int argc, char* argv[]) {
     // Verificar número de argumentos
@@ -60,15 +63,18 @@ int main(int argc, char* argv[]) {
 
         FileManager fm(archivoEntrada, archivoSalida, TransformationMethod::ROTATION, true);
 
-        // // Crear el allocador Buddy System de 32 MB
-        // BuddyAllocator allocador(32 * 1024 * 1024);
+        // Get the pixels of the image from the file
         unsigned char** pixels = fm.initializeOriginalPixelsFromFile();
         fm.showFileInfo();
         unsigned char** pixelsTransformados = fm.initializeTransformedPixels();
 
+        int offsetX = (fm.getTransformedImageWidth()  - fm.getWidth())  / 2;
+        int offsetY = (fm.getTransformedImageHeight() - fm.getHeight()) / 2;
+
+        // Copy the original pixels to the transformed image in the center
         for (int i = 0; i < fm.getHeight(); i++) {
             for (int j = 0; j < fm.getWidth() * fm.getChannels(); j++) {
-                pixelsTransformados[i][j] = pixels[i][j];
+                pixelsTransformados[i + offsetY][j + offsetX * fm.getChannels()] = pixels[i][j];
             }
         }
 
@@ -85,9 +91,13 @@ int main(int argc, char* argv[]) {
         fm.showFileInfo();
         unsigned char** pixelsTransformados = fm.initializeTransformedPixels();
 
+        int offsetX = (fm.getTransformedImageWidth()  - fm.getWidth())  / 2;
+        int offsetY = (fm.getTransformedImageHeight() - fm.getHeight()) / 2;
+
+        // Copy the original pixels to the transformed image in the center
         for (int i = 0; i < fm.getHeight(); i++) {
             for (int j = 0; j < fm.getWidth() * fm.getChannels(); j++) {
-                pixelsTransformados[i][j] = pixels[i][j];
+                pixelsTransformados[i + offsetY][j + offsetX * fm.getChannels()] = pixels[i][j];
             }
         }
 
