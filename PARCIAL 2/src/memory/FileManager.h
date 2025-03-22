@@ -25,6 +25,7 @@ private:
     TransformationMethod transformationMethod;
     int width;
     int height;
+    int channels;
     int transformedImageWidth;
     int transformedImageHeight;
     BuddyAllocator* allocatorOriginalImage;
@@ -43,8 +44,9 @@ public:
 
     unsigned char** initializeOriginalPixelsFromFile();
     unsigned char** initializeTransformedPixels();
-    void saveImage(unsigned char** data);
+    void saveImage(unsigned char** data, int width, int height, int channels);
     void getFileMetadata();
+    void showFileInfo() const;
 
     // Getters and setters
     std::string getReadFilePath() { return readFilePath; }
@@ -52,6 +54,7 @@ public:
     TransformationMethod getTransformationMethod() { return transformationMethod; }
     int getWidth() { return width; }
     int getHeight() { return height; }
+    int getChannels() { return channels; }
     int getTransformedImageWidth() { return transformedImageWidth; }
     int getTransformedImageHeight() { return transformedImageHeight; }
     unsigned char** getOriginalPixels() { return originalPixels; }
@@ -68,6 +71,7 @@ public:
     void setScaleFactor(double* factor) { scaleFactor = factor; }
     void setWidth(int w) { width = w; }
     void setHeight(int h) { height = h; }
+    void setChannels(int c) { channels = c; }
     void setTransformedImageWidth(int w) { transformedImageWidth = w; }
     void setTransformedImageHeight(int h) { transformedImageHeight = h; }
     void setReadFilePath(const std::string& path) { readFilePath = path; }

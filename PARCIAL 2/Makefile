@@ -5,11 +5,11 @@ TEST_CFLAGS = -I/usr/include/gtest -lgtest
 SOURCE_DIR = src
 OUTDIR = out
 
-# all: $(OUTDIR)/program
-# compile: $(OUTDIR)/program
+all: $(OUTDIR)/program
+compile: $(OUTDIR)/program
 
-# $(OUTDIR)/program: $(OUTDIR)/$(SOURCE_DIR)/main.o $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/memory/BuddyAllocator.o $(OUTDIR)/$(SOURCE_DIR)/utils/Utils.o
-# 	$(CC) $(CFLAGS) -o $@ $^
+$(OUTDIR)/program: $(OUTDIR)/$(SOURCE_DIR)/utils/Utils.o $(OUTDIR)/$(SOURCE_DIR)/standardImage/stb_wrapper.o $(OUTDIR)/$(SOURCE_DIR)/memory/BuddyAllocator.o $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/main.o
+	$(CC) $(CFLAGS) -o $@ $^
 
 TEST_DIR = $(SOURCE_DIR)/tests
 TEST_EXECUTABLES = $(OUTDIR)/$(TEST_DIR)/testUtils $(OUTDIR)/$(TEST_DIR)/testFileManager
@@ -43,7 +43,7 @@ $(OUTDIR)/$(TEST_DIR)/testFileManager.o: $(TEST_DIR)/testFileManager.cpp $(SOURC
 # Compile Source Files
 
 # Compile main.cpp
-$(OUTDIR)/$(SOURCE_DIR)/main.o: $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/core/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)
+$(OUTDIR)/$(SOURCE_DIR)/main.o: $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/memory/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile Utils.cpp
