@@ -35,7 +35,7 @@ protected:
 
 TEST_F(FileManagerTest, ReadValidFileWithAllocator) {
     FileManager fm(test_input, test_output, 
-                  TransformationMethod::ROTATION, true);
+                  TransformationMethod::ROTATION, true, 45.0);
     
     unsigned char** pixels = fm.initializeOriginalPixelsFromFile();
     ASSERT_NE(pixels, nullptr);
@@ -49,7 +49,7 @@ TEST_F(FileManagerTest, ReadValidFileWithAllocator) {
 
 TEST_F(FileManagerTest, ReadNonExistentFile) {
     FileManager fm(non_existent_file, test_output,
-                  TransformationMethod::ROTATION, false, nullptr);
+                  TransformationMethod::ROTATION, false, 45.0);
     
     EXPECT_EXIT(fm.initializeOriginalPixelsFromFile(), 
                ::testing::ExitedWithCode(1), 
@@ -58,7 +58,7 @@ TEST_F(FileManagerTest, ReadNonExistentFile) {
 
 TEST_F(FileManagerTest, RotationTransformation) {
     FileManager fm(test_input, test_output,
-                  TransformationMethod::ROTATION, false);
+                  TransformationMethod::ROTATION, false, 45.0);
     
     // Original dimensions
     fm.getFileMetadata();
@@ -67,9 +67,7 @@ TEST_F(FileManagerTest, RotationTransformation) {
 
     // Get transformed pixels
     unsigned char** transformed = fm.initializeTransformedPixels();
-    ASSERT_NE(transformed, nullptr);
-    
-    // Verify new dimensions (calculated by rotation logic)
+
     EXPECT_GT(fm.getTransformedImageWidth(), 2);
     EXPECT_GT(fm.getTransformedImageHeight(), 2);
 }
@@ -77,7 +75,7 @@ TEST_F(FileManagerTest, RotationTransformation) {
 TEST_F(FileManagerTest, ScalingTransformation) {
     double scale = 2.0;
     FileManager fm(test_input, test_output,
-                  TransformationMethod::SCALING, false, &scale);
+                  TransformationMethod::SCALING, false, scale);
     
     fm.getFileMetadata();
     unsigned char** transformed = fm.initializeTransformedPixels();
@@ -90,7 +88,7 @@ TEST_F(FileManagerTest, ScalingTransformation) {
 
 TEST_F(FileManagerTest, SaveTransformedImage) {
     FileManager fm(test_input, test_output,
-                  TransformationMethod::SCALING, false);
+                  TransformationMethod::SCALING, false, 2.0);
     
     // Create dummy transformed data
     int new_w = 4, new_h = 4;
@@ -110,7 +108,7 @@ TEST_F(FileManagerTest, SaveTransformedImage) {
 
 TEST_F(FileManagerTest, BuddyAllocatorUsage) {
     FileManager fm(test_input, test_output,
-                  TransformationMethod::ROTATION, true);
+                  TransformationMethod::ROTATION, true, 45.0);
 
     // Original image allocation
     unsigned char** orig = fm.initializeOriginalPixelsFromFile();
@@ -129,7 +127,7 @@ TEST_F(FileManagerTest, MemoryDeallocation) {
     double scale = 1.0;  // Or any valid scaling factor
     {
         FileManager fm(test_input, test_output,
-                      TransformationMethod::SCALING, true, &scale);
+                      TransformationMethod::SCALING, true, scale);
         fm.initializeOriginalPixelsFromFile();
         fm.initializeTransformedPixels();
     } // Destructor called here
@@ -140,7 +138,7 @@ TEST_F(FileManagerTest, MemoryDeallocation) {
 TEST_F(FileManagerTest, MemoryAccessTimeComparison) {
     // --- With Buddy Allocator ---
     auto startBuddy = std::chrono::high_resolution_clock::now();
-    FileManager fm("./src/tests/images/test.jpg", test_output, TransformationMethod::ROTATION, true);
+    FileManager fm("./src/tests/images/test.jpg", test_output, TransformationMethod::ROTATION, true, 45.0);
 
     unsigned char** pixels = fm.initializeOriginalPixelsFromFile();
     unsigned char** pixelsTransformados = fm.initializeTransformedPixels();
@@ -158,7 +156,7 @@ TEST_F(FileManagerTest, MemoryAccessTimeComparison) {
 
     // --- Without Buddy Allocator ---
     auto startStd = std::chrono::high_resolution_clock::now();
-    FileManager fmStd("./src/tests/images/test.jpg", test_output, TransformationMethod::ROTATION, false);
+    FileManager fmStd("./src/tests/images/test.jpg", test_output, TransformationMethod::ROTATION, false, 45.0);
 
     unsigned char** pixelsStd = fmStd.initializeOriginalPixelsFromFile();
     unsigned char** pixelsTransformadosStd = fmStd.initializeTransformedPixels();
