@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
         unsigned char** pixelsTransformados = fm.initializeTransformedPixels();
 
         for (int i = 0; i < fm.getHeight(); i++) {
-            for (int j = 0; j < fm.getWidth(); j++) {
+            for (int j = 0; j < fm.getWidth() * fm.getChannels(); j++) {
                 pixelsTransformados[i][j] = pixels[i][j];
             }
         }
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
         unsigned char** pixelsTransformados = fm.initializeTransformedPixels();
 
         for (int i = 0; i < fm.getHeight(); i++) {
-            for (int j = 0; j < fm.getWidth(); j++) {
+            for (int j = 0; j < fm.getWidth() * fm.getChannels(); j++) {
                 pixelsTransformados[i][j] = pixels[i][j];
             }
         }

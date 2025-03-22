@@ -126,7 +126,7 @@ void FileManager::getFileMetadata() {
      * Get the metadata of the image file.
      */
     if (!stbi_info(readFilePath.c_str(), &width, &height, &channels)) {
-        std::cerr << "Error: Could not read image metadata.\n";
+        std::cerr << "Error: Could not read image metadata of " << readFilePath << ".\n";
         exit(1);
     }
 }
@@ -151,13 +151,15 @@ unsigned char** FileManager::initializeOriginalPixelsFromFile() {
     }
     unsigned char* buffer = stbi_load(readFilePath.c_str(), &width, &height, &channels, 0);
     if (!buffer) {
-        std::cerr << "Error: Could not read image pixels.\n";
+        std::cerr << "Error: Could not read image pixels of " << readFilePath << ".\n";
         exit(1);
     }
 
     originalPixels = allocateMemory(width * channels, height, allocatorOriginalImage);
     for (int i = 0; i < height; ++i) {
-        memcpy(originalPixels[i], buffer + i * width * channels, width * channels);
+        for (int j = 0; j < width * channels; ++j) {
+            originalPixels[i][j] = buffer[i * width * channels + j];
+        }
     }
 
     stbi_image_free(buffer);

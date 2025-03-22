@@ -137,75 +137,40 @@ TEST_F(FileManagerTest, MemoryDeallocation) {
     SUCCEED();
 }
 
-TEST_F(FileManagerTest, MemoryAccessWithBuddyAllocator) {
-    // With BuddyAllocator
-    FileManager fm(test_input, test_output, TransformationMethod::ROTATION, true);
-    unsigned char** pixels = fm.initializeOriginalPixelsFromFile();
-    ASSERT_NE(pixels, nullptr);
-
-    // Time memory access
-    auto start = std::chrono::high_resolution_clock::now();
-    
-    volatile unsigned char dummy = 0;  // Prevent compiler optimization
-    for(int i = 0; i < fm.getHeight(); i++) {
-        for(int j = 0; j < fm.getWidth(); j++) {
-            dummy += pixels[i][j];
-        }
-    }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    std::cout << "\nBuddyAllocator access time: " << duration.count() << " ns\n";
-}
-
-TEST_F(FileManagerTest, MemoryAccessWithoutBuddyAllocator) {
-    // Without BuddyAllocator
-    FileManager fm(test_input, test_output, TransformationMethod::ROTATION, false);
-    unsigned char** pixels = fm.initializeOriginalPixelsFromFile();
-    ASSERT_NE(pixels, nullptr);
-
-    // Time memory access
-    auto start = std::chrono::high_resolution_clock::now();
-
-    volatile unsigned char dummy = 0;  // Prevent compiler optimization
-    for(int i = 0; i < fm.getHeight(); i++) {
-        for(int j = 0; j < fm.getWidth(); j++) {
-            dummy += pixels[i][j];
-        }
-    }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-    std::cout << "Standard allocation access time: " << duration.count() << " ns\n";
-}
-
 TEST_F(FileManagerTest, MemoryAccessTimeComparison) {
     // --- With Buddy Allocator ---
-    FileManager fmBuddy("/home/pipertpo/D/ArchivosdeAplicaciones/VSCode/EAFIT/SEMESTRE 7/SISTEMAS OPERATIVOS/PARCIALES/PARCIAL 2/src/tests/images/test.jpg", test_output, TransformationMethod::ROTATION, true);
-    fmBuddy.initializeOriginalPixelsFromFile();
-    // Use volatile to prevent compiler optimizing out the loop
-    volatile unsigned char sumBuddy = 0;
-    
     auto startBuddy = std::chrono::high_resolution_clock::now();
-    for (int i = 0; i < fmBuddy.getHeight(); i++) {
-        for (int j = 0; j < fmBuddy.getWidth(); j++) {
-            sumBuddy += fmBuddy.getOriginalPixels()[i][j];
+    FileManager fm("./src/tests/images/test.jpg", test_output, TransformationMethod::ROTATION, true);
+
+    unsigned char** pixels = fm.initializeOriginalPixelsFromFile();
+    unsigned char** pixelsTransformados = fm.initializeTransformedPixels();
+
+    for (int i = 0; i < fm.getHeight(); i++) {
+        for (int j = 0; j < fm.getWidth() * fm.getChannels(); j++) {
+            pixelsTransformados[i][j] = pixels[i][j];
         }
     }
+
+    // Guardar imagen procesada
+    fm.saveImage(pixelsTransformados, fm.getTransformedImageWidth(), fm.getTransformedImageHeight(), fm.getChannels());
     auto endBuddy = std::chrono::high_resolution_clock::now();
     auto durationBuddy = std::chrono::duration_cast<std::chrono::microseconds>(endBuddy - startBuddy).count();
 
     // --- Without Buddy Allocator ---
-    FileManager fmStd("/home/pipertpo/D/ArchivosdeAplicaciones/VSCode/EAFIT/SEMESTRE 7/SISTEMAS OPERATIVOS/PARCIALES/PARCIAL 2/src/tests/images/test.jpg", test_output, TransformationMethod::ROTATION, false);
-    fmStd.initializeOriginalPixelsFromFile();
-    volatile unsigned char sumStd = 0;
-    
     auto startStd = std::chrono::high_resolution_clock::now();
+    FileManager fmStd("./src/tests/images/test.jpg", test_output, TransformationMethod::ROTATION, false);
+
+    unsigned char** pixelsStd = fmStd.initializeOriginalPixelsFromFile();
+    unsigned char** pixelsTransformadosStd = fmStd.initializeTransformedPixels();
+
     for (int i = 0; i < fmStd.getHeight(); i++) {
-        for (int j = 0; j < fmStd.getWidth(); j++) {
-            sumStd += fmStd.getOriginalPixels()[i][j];
+        for (int j = 0; j < fmStd.getWidth() * fmStd.getChannels(); j++) {
+            pixelsTransformadosStd[i][j] = pixelsStd[i][j];
         }
     }
+
+    // Guardar imagen procesada
+    fmStd.saveImage(pixelsTransformadosStd, fmStd.getTransformedImageWidth(), fmStd.getTransformedImageHeight(), fmStd.getChannels());
     auto endStd = std::chrono::high_resolution_clock::now();
     auto durationStd = std::chrono::duration_cast<std::chrono::microseconds>(endStd - startStd).count();
 
