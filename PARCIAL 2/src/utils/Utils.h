@@ -5,7 +5,7 @@
 
 class Utils {
 public:
-    static void getSizeImageRotated(int &width, int &height);
+    static void getSizeImageRotated(int &width, int &height, double angle_degrees);
     static void getSizeImageScaled(int &width, int &height, double scale);
     static size_t roundToNextPowerOfTwo(size_t size);
 };

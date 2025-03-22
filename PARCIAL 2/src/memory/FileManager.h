@@ -33,13 +33,13 @@ private:
     unsigned char** originalPixels;
     unsigned char** transformedPixels;
     bool buddyAllocatorUsage;
-    double* scaleFactor;
+    // If degrees, give the angle in degrees. If scaling, give the scaling factor
+    double transformationFactor;
 
     unsigned char** allocateMemory(int width, int height, BuddyAllocator* allocator);
     void deallocateMemory(unsigned char** pixels, int height);
 public:
-    FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage);
-    FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double* scaleFactor);
+    FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double factor);
     ~FileManager();
 
     unsigned char** initializeOriginalPixelsFromFile();
@@ -62,13 +62,13 @@ public:
     BuddyAllocator* getAllocatorOriginalImage() { return allocatorOriginalImage; }
     BuddyAllocator* getAllocatorTransformedImage() { return allocatorTransformedImage; }
     bool getBuddyAllocatorUsage() { return buddyAllocatorUsage; }
-    double* getScaleFactor() { return scaleFactor; }
+    double getTransformationFactor() { return transformationFactor; }
     void setOriginalPixels(unsigned char** pixels) { originalPixels = pixels; }
     void setTransformedPixels(unsigned char** pixels) { transformedPixels = pixels; }
     void setAllocatorOriginalImage(BuddyAllocator* allocator) { allocatorOriginalImage = allocator; }
     void setAllocatorTransformedImage(BuddyAllocator* allocator) { allocatorTransformedImage = allocator; }
     void setBuddyAllocatorUsage(bool usage) { buddyAllocatorUsage = usage; }
-    void setScaleFactor(double* factor) { scaleFactor = factor; }
+    void setTransformationFactor(double factor) { transformationFactor = factor; }
     void setWidth(int w) { width = w; }
     void setHeight(int h) { height = h; }
     void setChannels(int c) { channels = c; }

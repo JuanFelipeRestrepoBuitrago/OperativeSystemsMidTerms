@@ -1,19 +1,17 @@
 #include "Utils.h"
 #include <cmath>
 
-void Utils::getSizeImageRotated(int &width, int &height) {
-    /**
-     * Calculate the new size of each side of the image after rotating it by 45 degrees.
-     * 
-     * @param width: The width of the image.
-     * @param height: The height of the image.
-     */
-    // Calculate the hypotenuse of the image
-    double hypotenuse = std::sqrt(std::pow(width / 2, 2) + std::pow(height / 2, 2));
-
-    // Calculate the new width and height
-    width = std::ceil(2 * hypotenuse);
-    height = std::ceil(2 * hypotenuse);
+void Utils::getSizeImageRotated(int& width, int& height, double angle_degrees) {
+    double angle = angle_degrees * M_PI / 180.0;
+    double cos_theta = fabs(cos(angle));
+    double sin_theta = fabs(sin(angle));
+    
+    // Calculate new dimensions based on rotated bounds
+    int new_width = static_cast<int>(ceil(width * cos_theta + height * sin_theta));
+    int new_height = static_cast<int>(ceil(width * sin_theta + height * cos_theta));
+    
+    width = new_width;
+    height = new_height;
 }
 
 void Utils::getSizeImageScaled(int &width, int &height, double scale) {

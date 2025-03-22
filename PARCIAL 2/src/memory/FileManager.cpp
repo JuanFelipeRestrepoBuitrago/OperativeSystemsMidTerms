@@ -1,6 +1,6 @@
 #include "FileManager.h"
 
-FileManager::FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage) {
+FileManager::FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double factor) {
     /**
      * Constructor for the FileManager class.
      * 
@@ -8,6 +8,7 @@ FileManager::FileManager(const std::string& readFilePath, const std::string& wri
      * @param writeFilePath: The path to the file to be written.
      * @param transformationMethod: The method to be used for transforming the image.
      * @param buddyAllocatorUsage: Whether to use the buddy allocator for memory management.
+     * @param factor: The factor by which the image will be transformed. If degrees, give the angle in degrees. If scaling, give the scaling factor.
      */
     this -> readFilePath = readFilePath;
     this -> writeFilePath = writeFilePath;
@@ -17,32 +18,7 @@ FileManager::FileManager(const std::string& readFilePath, const std::string& wri
     this -> allocatorTransformedImage = nullptr;
     this -> originalPixels = nullptr;
     this -> transformedPixels = nullptr;
-    this -> scaleFactor = nullptr;
-    this -> width = 0;
-    this -> height = 0;
-    this -> transformedImageWidth = 0;
-    this -> transformedImageHeight = 0;
-}
-
-FileManager::FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double* scaleFactor) {
-    /**
-     * Constructor for the FileManager class.
-     * 
-     * @param readFilePath: The path to the file to be read.
-     * @param writeFilePath: The path to the file to be written.
-     * @param transformationMethod: The method to be used for transforming the image.
-     * @param buddyAllocatorUsage: Whether to use the buddy allocator for memory management.
-     * @param scaleFactor: The factor by which the image will be scaled, null if not scaling.
-     */
-    this -> readFilePath = readFilePath;
-    this -> writeFilePath = writeFilePath;
-    this -> transformationMethod = transformationMethod;
-    this -> buddyAllocatorUsage = buddyAllocatorUsage;
-    this -> allocatorOriginalImage = nullptr;
-    this -> allocatorTransformedImage = nullptr;
-    this -> originalPixels = nullptr;
-    this -> transformedPixels = nullptr;
-    this -> scaleFactor = scaleFactor;
+    this -> transformationFactor = factor;
     this -> width = 0;
     this -> height = 0;
     this -> transformedImageWidth = 0;
@@ -178,14 +154,10 @@ unsigned char** FileManager::initializeTransformedPixels() {
 
     switch (transformationMethod) {
         case TransformationMethod::ROTATION:
-            Utils::getSizeImageRotated(transformedImageWidth, transformedImageHeight);
+            Utils::getSizeImageRotated(transformedImageWidth, transformedImageHeight, transformationFactor);
             break;
         case TransformationMethod::SCALING:
-            if (scaleFactor == nullptr) {
-                std::cerr << "Error: Scale factor is not provided.\n";
-                exit(1);
-            }
-            Utils::getSizeImageScaled(transformedImageWidth, transformedImageHeight, *scaleFactor);
+            Utils::getSizeImageScaled(transformedImageWidth, transformedImageHeight, transformationFactor);
             break;
     }
 
