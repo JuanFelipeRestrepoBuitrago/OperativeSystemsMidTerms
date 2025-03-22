@@ -192,7 +192,7 @@ unsigned char** FileManager::initializeTransformedPixels() {
         allocatorTransformedImage = new BuddyAllocator(size);
     }
 
-    transformedPixels = allocateMemory(transformedImageWidth, transformedImageHeight, allocatorTransformedImage);
+    transformedPixels = allocateMemory(transformedImageWidth * channels, transformedImageHeight, allocatorTransformedImage);
 
     return transformedPixels;
 }
@@ -208,7 +208,7 @@ void FileManager::saveImage(unsigned char** data, int width, int height, int cha
         memcpy(buffer + i * width * channels, data[i], width * channels);
     }
 
-    if (!stbi_write_png(writeFilePath.c_str(), width, height, channels, buffer, width * channels)) {
+    if (!stbi_write_jpg(writeFilePath.c_str(), width, height, channels, buffer, width * channels)) {
         std::cerr << "Error: Could not write image to file.\n";
         delete[] buffer;
         exit(1);
