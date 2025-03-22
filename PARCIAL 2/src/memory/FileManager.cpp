@@ -51,36 +51,11 @@ FileManager::~FileManager() {
 }
 
 unsigned char** FileManager::allocateMemory(int width, int height, BuddyAllocator* allocator) {
-    if (buddyAllocatorUsage && allocator != nullptr) {
-        // Calculate total memory needed for row pointers + pixel data
-        size_t row_pointers_size = height * sizeof(unsigned char*);
-        size_t pixels_size = height * width * sizeof(unsigned char);
-        size_t total_size = row_pointers_size + pixels_size;
-
-        // Allocate a single block from the buddy allocator
-        void* block = allocator->alloc(total_size);
-        if (!block) {
-            std::cerr << "Error: BuddyAllocator failed to allocate memory.\n";
-            exit(1);
-        }
-
-        // Set up row pointers and pixel data in the block
-        unsigned char** rows = static_cast<unsigned char**>(block);
-        unsigned char* pixels = reinterpret_cast<unsigned char*>(rows + height);
-
-        for (int i = 0; i < height; ++i) {
-            rows[i] = pixels + i * width;
-        }
-
-        return rows;
-    } else {
-        // Fallback to standard allocation
-        unsigned char** pixels = new unsigned char*[height];
-        for (int i = 0; i < height; ++i) {
-            pixels[i] = new unsigned char[width];
-        }
-        return pixels;
+    unsigned char** pixels = new unsigned char*[height];
+    for (int i = 0; i < height; ++i) {
+        pixels[i] = new unsigned char[width];
     }
+    return pixels;
 }
 
 void FileManager::deallocateMemory(unsigned char** pixels, int height) {
