@@ -17,13 +17,13 @@ public:
     int getWidth() const;
     int getHeight() const;
     int getChannels() const;
+    void initializeBufferWithColor(Pixel fillColor, unsigned char** transformedPixels, int newWidth, int newHeight);
 
 private:
     int width;
     int height;
     int channels;
 
-    void initializeBufferWithColor(Pixel fillColor, unsigned char** transformedPixels, int newWidth, int newHeight);
     
 };
 
