@@ -69,6 +69,9 @@ void ImageManager::rotateImage(float angleDegrees, Pixel fillColor, unsigned cha
     double theta = -angleDegrees * M_PI / 180.0;
     double cx = width / 2.0, cy = height / 2.0;
 
+    double cos_theta = cos(theta);
+    double sin_theta = sin(theta);
+
     double cx_new = newWidth / 2.0;
     double cy_new = newHeight / 2.0;
 
@@ -80,18 +83,27 @@ void ImageManager::rotateImage(float angleDegrees, Pixel fillColor, unsigned cha
             double xRel = xNew - cx_new;
             double yRel = yNew - cy_new;
 
-            double xOrig = xRel * cos(theta) - yRel * sin(theta) + cx;
-            double yOrig = xRel * sin(theta) + yRel * cos(theta) + cy;
+            double xOrig = xRel * cos_theta - yRel * sin_theta + cx;
+            double yOrig = xRel * sin_theta + yRel * cos_theta + cy;
 
-            int xOrigRounded = round(xOrig);
-            int yOrigRounded = round(yOrig);
+            int x0 = floor(xOrig);
+            int y0 = floor(yOrig);
+            int x1 = x0 + 1;
+            int y1 = y0 + 1;
 
-            if (xOrigRounded >= 0 && xOrigRounded < width && yOrigRounded >= 0 && yOrigRounded < height) {
-                int idxDst = xNew * channels;
-                int idxSrc = xOrigRounded * channels;
+            if (x0 >= 0 && x1 < width && y0 >= 0 && y1 < height) {
+                double dx = xOrig - x0;
+                double dy = yOrig - y0;
 
                 for (int c = 0; c < channels; c++) {
-                    transformedPixels[yNew][idxDst + c] = originalPixels[yOrigRounded][idxSrc + c];
+                    double pixel = 
+                        (1 - dx) * (1 - dy) * originalPixels[y0][x0 * channels + c] +
+                        dx * (1 - dy) * originalPixels[y0][x1 * channels + c] +
+                        (1 - dx) * dy * originalPixels[y1][x0 * channels + c] +
+                        dx * dy * originalPixels[y1][x1 * channels + c];
+
+                    int idxDst = xNew * channels + c;
+                    transformedPixels[yNew][idxDst] = static_cast<unsigned char>(round(pixel));
                 }
             }
         }
