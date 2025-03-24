@@ -10,11 +10,9 @@ struct Pixel {
 
 class ImageManager {
 public:
-    ImageManager();
+    ImageManager(int width, int height, int channels);
 
-    void loadDataFromPixels(unsigned char** pixels, int width, int height, int channels);
-    void rotateImage(float angleDegrees, Pixel fillColor);
-    unsigned char** exportDataToPixels();
+    void rotateImage(float angleDegrees, Pixel fillColor, unsigned char** transformedPixels, unsigned char** originalPixels, int newWidth, int newHeight);
 
     int getWidth() const;
     int getHeight() const;
@@ -24,7 +22,8 @@ private:
     int width;
     int height;
     int channels;
-    std::vector<std::vector<Pixel>> data;
+
+    void initializeBufferWithColor(Pixel fillColor, unsigned char** transformedPixels, int newWidth, int newHeight);
     
 };
 
