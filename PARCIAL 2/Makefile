@@ -1,23 +1,24 @@
 CC = g++
 CFLAGS = -Wall -Wextra -std=c++17 
 MACFLAGS = -I/opt/homebrew/opt/googletest/include -L/opt/homebrew/opt/googletest/lib
-TEST_CFLAGS = -I/usr/include/gtest -lgtest
+TEST_CFLAGS = -I/usr/include/gtest -lgtest -pthread
 SOURCE_DIR = src
 OUTDIR = out
 
 all: $(OUTDIR)/program
 compile: $(OUTDIR)/program
 
-$(OUTDIR)/program: $(OUTDIR)/$(SOURCE_DIR)/utils/Utils.o $(OUTDIR)/$(SOURCE_DIR)/standardImage/stb_wrapper.o $(OUTDIR)/$(SOURCE_DIR)/memory/BuddyAllocator.o $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/main.o
+$(OUTDIR)/program: $(OUTDIR)/$(SOURCE_DIR)/utils/Utils.o $(OUTDIR)/$(SOURCE_DIR)/standardImage/stb_wrapper.o $(OUTDIR)/$(SOURCE_DIR)/memory/BuddyAllocator.o $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/core/ImageManager.o $(OUTDIR)/$(SOURCE_DIR)/main.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 TEST_DIR = $(SOURCE_DIR)/tests
-TEST_EXECUTABLES = $(OUTDIR)/$(TEST_DIR)/testUtils $(OUTDIR)/$(TEST_DIR)/testFileManager
+TEST_EXECUTABLES = $(OUTDIR)/$(TEST_DIR)/testUtils $(OUTDIR)/$(TEST_DIR)/testFileManager $(OUTDIR)/$(TEST_DIR)/testImageManager
 
 # Run All Tests
 test: clean $(TEST_EXECUTABLES)
 	./$(OUTDIR)/$(TEST_DIR)/testUtils
 	./$(OUTDIR)/$(TEST_DIR)/testFileManager
+	./$(OUTDIR)/$(TEST_DIR)/testImageManager
 
 # Run individual tests
 testUtils: clean $(OUTDIR)/$(TEST_DIR)/testUtils
@@ -25,6 +26,9 @@ testUtils: clean $(OUTDIR)/$(TEST_DIR)/testUtils
 
 testFileManager: clean $(OUTDIR)/$(TEST_DIR)/testFileManager
 	./$(OUTDIR)/$(TEST_DIR)/testFileManager
+
+testImageManager: clean $(OUTDIR)/$(TEST_DIR)/testImageManager
+	./$(OUTDIR)/$(TEST_DIR)/testImageManager
 
 # Compile testUtils
 $(OUTDIR)/$(TEST_DIR)/testUtils: $(OUTDIR)/$(TEST_DIR)/testUtils.o $(OUTDIR)/$(SOURCE_DIR)/utils/Utils.o
@@ -38,6 +42,13 @@ $(OUTDIR)/$(TEST_DIR)/testFileManager: $(OUTDIR)/$(TEST_DIR)/testFileManager.o $
 	$(CC) $(CFLAGS) -o $@ $^ $(TEST_CFLAGS)
 
 $(OUTDIR)/$(TEST_DIR)/testFileManager.o: $(TEST_DIR)/testFileManager.cpp $(SOURCE_DIR)/utils/Utils.h $(SOURCE_DIR)/memory/FileManager.h $(SOURCE_DIR)/memory/BuddyAllocator.h $(SOURCE_DIR)/standardImage/stb_image.h $(SOURCE_DIR)/standardImage/stb_image_write.h | $(OUTDIR)/$(TEST_DIR)
+	$(CC) $(CFLAGS) $(TEST_CFLAGS) -c $(word 1, $^) -o $@
+
+# Compile testImageManager
+$(OUTDIR)/$(TEST_DIR)/testImageManager: $(OUTDIR)/$(TEST_DIR)/testImageManager.o $(OUTDIR)/$(SOURCE_DIR)/utils/Utils.o $(OUTDIR)/$(SOURCE_DIR)/standardImage/stb_wrapper.o $(OUTDIR)/$(SOURCE_DIR)/memory/BuddyAllocator.o $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/core/ImageManager.o
+	$(CC) $(CFLAGS) -o $@ $^ $(TEST_CFLAGS)
+
+$(OUTDIR)/$(TEST_DIR)/testImageManager.o: $(TEST_DIR)/testImageManager.cpp $(SOURCE_DIR)/core/ImageManager.h $(SOURCE_DIR)/utils/Utils.h $(SOURCE_DIR)/memory/FileManager.h $(SOURCE_DIR)/memory/BuddyAllocator.h $(SOURCE_DIR)/standardImage/stb_image.h $(SOURCE_DIR)/standardImage/stb_image_write.h | $(OUTDIR)/$(TEST_DIR)
 	$(CC) $(CFLAGS) $(TEST_CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile Source Files
@@ -62,6 +73,11 @@ $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o: $(SOURCE_DIR)/memory/FileManager.c
 $(OUTDIR)/$(SOURCE_DIR)/standardImage/stb_wrapper.o: $(SOURCE_DIR)/standardImage/stb_wrapper.cpp $(SOURCE_DIR)/standardImage/stb_image.h $(SOURCE_DIR)/standardImage/stb_image_write.h | $(OUTDIR)/$(SOURCE_DIR)/standardImage
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
+# Compile ImageManager.cpp
+$(OUTDIR)/$(SOURCE_DIR)/core/ImageManager.o: $(SOURCE_DIR)/core/ImageManager.cpp $(SOURCE_DIR)/core/ImageManager.h $(SOURCE_DIR)/utils/Utils.h | $(OUTDIR)/$(SOURCE_DIR)/core
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
+
 # Create output directories if they don't exist
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
@@ -80,6 +96,9 @@ $(OUTDIR)/$(SOURCE_DIR)/utils: | $(OUTDIR)/$(SOURCE_DIR)
 
 $(OUTDIR)/$(SOURCE_DIR)/standardImage: | $(OUTDIR)/$(SOURCE_DIR)
 	mkdir -p $(OUTDIR)/$(SOURCE_DIR)/standardImage
+
+$(OUTDIR)/$(SOURCE_DIR)/core: | $(OUTDIR)/$(SOURCE_DIR)
+	mkdir -p $(OUTDIR)/$(SOURCE_DIR)/core
 
 # Clean output files
 clean:
