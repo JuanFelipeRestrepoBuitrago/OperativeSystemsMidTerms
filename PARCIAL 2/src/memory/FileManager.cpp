@@ -129,7 +129,7 @@ unsigned char** FileManager::initializeTransformedPixels() {
 
     switch (transformationMethod) {
         case TransformationMethod::ROTATION:
-            Utils::getSizeImageRotated(transformedImageWidth, transformedImageHeight, transformationFactor);
+            Utils::getSizeImageRotated(transformedImageWidth, transformedImageHeight);
             break;
         case TransformationMethod::SCALING:
             Utils::getSizeImageScaled(transformedImageWidth, transformedImageHeight, transformationFactor);
