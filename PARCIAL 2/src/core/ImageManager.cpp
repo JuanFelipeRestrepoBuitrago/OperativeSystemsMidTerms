@@ -66,7 +66,7 @@ void ImageManager::rotateImage(float angleDegrees, Pixel fillColor, unsigned cha
      * @param newWidth The width of the rotated image.
      * @param newHeight The height of the rotated image.
      */
-    double theta = angleDegrees * M_PI / 180.0;
+    double theta = -angleDegrees * M_PI / 180.0;
     double cx = width / 2.0, cy = height / 2.0;
 
     double cx_new = newWidth / 2.0;
@@ -74,22 +74,24 @@ void ImageManager::rotateImage(float angleDegrees, Pixel fillColor, unsigned cha
 
     initializeBufferWithColor(fillColor, transformedPixels, newWidth, newHeight);
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            double xRel = x - cx;
-            double yRel = y - cy;
+    for (int yNew = 0; yNew < newHeight; ++yNew) {
+        for (int xNew = 0; xNew < newWidth; ++xNew) {
 
-            double xRot = xRel * cos(theta) - yRel * sin(theta);
-            double yRot = xRel * sin(theta) + yRel * cos(theta);
+            double xRel = xNew - cx_new;
+            double yRel = yNew - cy_new;
 
-            int xNew = round(cx_new + xRot);
-            int yNew = round(cy_new + yRot);
+            double xOrig = xRel * cos(theta) - yRel * sin(theta) + cx;
+            double yOrig = xRel * sin(theta) + yRel * cos(theta) + cy;
 
-            if (xNew >= 0 && xNew < newWidth && yNew >= 0 && yNew < newHeight) {
-                int idxSrc = x * channels;
+            int xOrigRounded = round(xOrig);
+            int yOrigRounded = round(yOrig);
+
+            if (xOrigRounded >= 0 && xOrigRounded < width && yOrigRounded >= 0 && yOrigRounded < height) {
                 int idxDst = xNew * channels;
+                int idxSrc = xOrigRounded * channels;
+
                 for (int c = 0; c < channels; c++) {
-                    transformedPixels[yNew][idxDst + c] = originalPixels[y][idxSrc + c];
+                    transformedPixels[yNew][idxDst + c] = originalPixels[yOrigRounded][idxSrc + c];
                 }
             }
         }
