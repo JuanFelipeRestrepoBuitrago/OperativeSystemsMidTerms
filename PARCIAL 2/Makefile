@@ -8,7 +8,7 @@ OUTDIR = out
 all: $(OUTDIR)/program
 compile: $(OUTDIR)/program
 
-$(OUTDIR)/program: $(OUTDIR)/$(SOURCE_DIR)/utils/Utils.o $(OUTDIR)/$(SOURCE_DIR)/standardImage/stb_wrapper.o $(OUTDIR)/$(SOURCE_DIR)/memory/BuddyAllocator.o $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/main.o
+$(OUTDIR)/program: $(OUTDIR)/$(SOURCE_DIR)/utils/Utils.o $(OUTDIR)/$(SOURCE_DIR)/standardImage/stb_wrapper.o $(OUTDIR)/$(SOURCE_DIR)/memory/BuddyAllocator.o $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/core/ImageManager.o $(OUTDIR)/$(SOURCE_DIR)/main.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 TEST_DIR = $(SOURCE_DIR)/tests
@@ -62,6 +62,11 @@ $(OUTDIR)/$(SOURCE_DIR)/memory/FileManager.o: $(SOURCE_DIR)/memory/FileManager.c
 $(OUTDIR)/$(SOURCE_DIR)/standardImage/stb_wrapper.o: $(SOURCE_DIR)/standardImage/stb_wrapper.cpp $(SOURCE_DIR)/standardImage/stb_image.h $(SOURCE_DIR)/standardImage/stb_image_write.h | $(OUTDIR)/$(SOURCE_DIR)/standardImage
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
+# Compile ImageManager.cpp
+$(OUTDIR)/$(SOURCE_DIR)/core/ImageManager.o: $(SOURCE_DIR)/core/ImageManager.cpp $(SOURCE_DIR)/core/ImageManager.h $(SOURCE_DIR)/utils/Utils.h | $(OUTDIR)/$(SOURCE_DIR)/core
+	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
+
+
 # Create output directories if they don't exist
 $(OUTDIR):
 	mkdir -p $(OUTDIR)
@@ -80,6 +85,9 @@ $(OUTDIR)/$(SOURCE_DIR)/utils: | $(OUTDIR)/$(SOURCE_DIR)
 
 $(OUTDIR)/$(SOURCE_DIR)/standardImage: | $(OUTDIR)/$(SOURCE_DIR)
 	mkdir -p $(OUTDIR)/$(SOURCE_DIR)/standardImage
+
+$(OUTDIR)/$(SOURCE_DIR)/core: | $(OUTDIR)/$(SOURCE_DIR)
+	mkdir -p $(OUTDIR)/$(SOURCE_DIR)/core
 
 # Clean output files
 clean:
