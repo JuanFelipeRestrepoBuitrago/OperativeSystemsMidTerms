@@ -1,17 +1,15 @@
 #include "Utils.h"
 #include <cmath>
 
-void Utils::getSizeImageRotated(int& width, int& height, double angle_degrees) {
-    double angle = angle_degrees * M_PI / 180.0;
-    double cos_theta = fabs(cos(angle));
-    double sin_theta = fabs(sin(angle));
+void Utils::getSizeImageRotated(int& width, int& height) {
+    double cx = width / 2.0, cy = height / 2.0;
+
+    double R = sqrt(cx * cx + cy * cy);
+    int newWidth = ceil(2 * R);
+    int newHeight = ceil(2 * R);
     
-    // Calculate new dimensions based on rotated bounds
-    int new_width = static_cast<int>(ceil(width * cos_theta + height * sin_theta));
-    int new_height = static_cast<int>(ceil(width * sin_theta + height * cos_theta));
-    
-    width = new_width;
-    height = new_height;
+    width = newWidth;
+    height = newHeight;
 }
 
 void Utils::getSizeImageScaled(int &width, int &height, double scale) {
