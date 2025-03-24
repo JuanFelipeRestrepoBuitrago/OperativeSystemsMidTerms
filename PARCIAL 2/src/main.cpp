@@ -58,18 +58,13 @@ int main(int argc, char* argv[]) {
     unsigned char** originalPixels = fm.initializeOriginalPixelsFromFile();
     fm.showFileInfo();
 
-    ImageManager imgManager;
-    imgManager.loadDataFromPixels(originalPixels, fm.getWidth(), fm.getHeight(), fm.getChannels());
+    ImageManager imgManager(fm.getWidth(), fm.getHeight(), fm.getChannels());
+    unsigned char** transformedPixels = fm.initializeTransformedPixels();
 
     Pixel fillColor = {0, 0, 0, 255};
-    imgManager.rotateImage(factor, fillColor);
+    imgManager.rotateImage(factor, fillColor, transformedPixels, originalPixels, fm.getTransformedImageWidth(), fm.getTransformedImageHeight());
 
-    fm.setTransformedImageWidth(imgManager.getWidth());
-    fm.setTransformedImageHeight(imgManager.getHeight());
-
-    unsigned char** rotatedPixels = imgManager.exportDataToPixels();
-
-    fm.saveImage(rotatedPixels, imgManager.getWidth(), imgManager.getHeight(), imgManager.getChannels());
+    fm.saveImage(transformedPixels, fm.getTransformedImageWidth(), fm.getTransformedImageHeight(), fm.getChannels());
 
     auto end = high_resolution_clock::now();
     auto duration = duration_cast<milliseconds>(end - start).count();
