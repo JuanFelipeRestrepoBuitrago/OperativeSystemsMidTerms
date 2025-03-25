@@ -111,3 +111,47 @@ void ImageManager::rotateImage(float angleDegrees, Pixel fillColor, unsigned cha
     width = newWidth;
     height = newHeight;
 }
+
+void ImageManager::scaleImage(float scaleFactor, unsigned char** transformedPixels, unsigned char** originalPixels) {
+    /**
+     * Scale the image by the specified factor and store the result in the provided buffer.
+     * 
+     * @param scaleFactor The scaling factor to apply..
+     * @param transformedPixels The buffer to store the scaled image.
+     * @param originalPixels The original image buffer.
+     */
+    int newWidth = static_cast<int>(width * scaleFactor);
+    int newHeight = static_cast<int>(height * scaleFactor);
+
+    for (int yNew = 0; yNew < newHeight; ++yNew) {
+        for (int xNew = 0; xNew < newWidth; ++xNew) {
+
+            float xOrig = xNew / scaleFactor;
+            float yOrig = yNew / scaleFactor;
+
+            int x0 = static_cast<int>(std::floor(xOrig));
+            int y0 = static_cast<int>(std::floor(yOrig));
+            int x1 = std::min(x0 + 1, width - 1);
+            int y1 = std::min(y0 + 1, height - 1);
+
+            float dx = xOrig - x0;
+            float dy = yOrig - y0;
+
+            if (x1 < width && y1 < height) {
+                for (int c = 0; c < channels; ++c) {
+                    float pixel =
+                        (1 - dx) * (1 - dy) * originalPixels[y0][x0 * channels + c] +
+                        dx * (1 - dy) * originalPixels[y0][x1 * channels + c] +
+                        (1 - dx) * dy * originalPixels[y1][x0 * channels + c] +
+                        dx * dy * originalPixels[y1][x1 * channels + c];
+
+                    int idxDst = xNew * channels + c;
+                    transformedPixels[yNew][idxDst] = static_cast<unsigned char>(std::round(pixel));
+                }
+            }
+        }
+    }
+
+    width = newWidth;
+    height = newHeight;
+}

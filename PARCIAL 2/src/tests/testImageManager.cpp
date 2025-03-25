@@ -89,6 +89,35 @@ TEST_F(ImageManagerTest, RotateImageKeepsDimensions) {
     delete[] rotatedPixels;
 }
 
+TEST_F(ImageManagerTest, ScaleImageChangesDimensionsCorrectly) {
+    float scaleFactor = 2.0f;
+    int newWidth = static_cast<int>(width * scaleFactor);
+    int newHeight = static_cast<int>(height * scaleFactor);
+
+    unsigned char** scaledPixels = new unsigned char*[newHeight];
+    for (int y = 0; y < newHeight; y++) {
+        scaledPixels[y] = new unsigned char[newWidth * channels];
+    }
+
+    imgManager->scaleImage(scaleFactor, scaledPixels, originalPixels);
+
+    EXPECT_EQ(imgManager->getWidth(), newWidth);
+    EXPECT_EQ(imgManager->getHeight(), newHeight);
+
+    int cx = newWidth / 2;
+    int cy = newHeight / 2;
+    int idx = cx * channels;
+
+    EXPECT_GE(scaledPixels[cy][idx], 0);
+    EXPECT_LE(scaledPixels[cy][idx], 255);
+
+    for (int y = 0; y < newHeight; y++) {
+        delete[] scaledPixels[y];
+    }
+    delete[] scaledPixels;
+}
+
+
 int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
