@@ -13,7 +13,8 @@ public:
     ImageManager(int width, int height, int channels);
 
     void rotateImage(float angleDegrees, Pixel fillColor, unsigned char** transformedPixels, unsigned char** originalPixels, int newWidth, int newHeight);
-
+    void scaleImage(float scaleFactor, unsigned char** transformedPixels, unsigned char** originalPixels);
+        
     int getWidth() const;
     int getHeight() const;
     int getChannels() const;
