@@ -1,8 +1,7 @@
 CC = g++
-CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest
-LDFLAGS = -lgtest -lgtest_main -pthread -lcrypto
+CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest $(MACFLAGS)
+LDFLAGS = -lgtest -lgtest_main -pthread -lcrypto $(MACFLAGS)
 MACFLAGS = -I/opt/homebrew/opt/openssl@3/include -I/opt/homebrew/opt/googletest/include -L/opt/homebrew/opt/openssl@3/lib -L/opt/homebrew/opt/googletest/lib
-
 SOURCE_DIR = src
 OUTDIR = out
 
