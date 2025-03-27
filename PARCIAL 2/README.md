@@ -32,7 +32,27 @@ The **Buddy System** is widely used in **operating systems** and **real-time app
 
 
 ### Image Rotation & Scaling
-Image rotation and scaling are common operations in image processing that transform images for various purposes, such as display, printing, or analysis.
+
+Image rotation and scaling are essential operations in image processing, and are implemented in the project using **bilinear interpolation** for smooth transformations. Both operations preserve image quality while altering geometry.
+
+#### Image Rotation
+
+Image rotation is implemented via reverse mapping and bilinear interpolation.
+
+- **Rotation Angle**: The image is rotated around its center using an angle in degrees.
+- **Inverse Mapping**: For each pixel in the output (rotated) image, its corresponding position in the original image is computed using the inverse rotation matrix.
+- **Interpolation**: Since the calculated source position might not map exactly to a pixel, bilinear interpolation is used based on the four nearest pixels.
+- **Background Fill**: Pixels that map outside the original image are filled with a user-defined color.
+
+#### Image Scaling
+
+Image scaling is implemented using reverse mapping and bilinear interpolation, similar to rotation, to ensure smooth resizing without introducing artifacts.
+
+- **Scale Factor**: The image is scaled using a float multiplier. Values greater than 1 enlarge the image, while values between 0 and 1 reduce its size.
+- **Reverse Mapping**: For each pixel in the output (scaled) image, its corresponding floating-point coordinate in the original image is computed by dividing by the scale factor.
+- **Interpolation**: Since these coordinates are not guaranteed to be integers, bilinear interpolation is used. The value is estimated based on the four surrounding pixels in the original image.
+- **Boundary Handling**: Out-of-bounds coordinates are clamped using `min()` to prevent memory access violations, ensuring smooth edges in scaled-down images.
+
 
 ## Requirements
 
