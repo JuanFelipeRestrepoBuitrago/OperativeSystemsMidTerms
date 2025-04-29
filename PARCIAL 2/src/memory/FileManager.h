@@ -36,14 +36,14 @@ private:
     // If degrees, give the angle in degrees. If scaling, give the scaling factor
     double transformationFactor;
 
-    unsigned char** allocateMemory(int width, int height, BuddyAllocator* allocator);
+    unsigned char** allocateMemory(int width, int height, BuddyAllocator* allocator, bool parallelize);
     void deallocateMemory(unsigned char** pixels, int height);
 public:
     FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double factor);
     ~FileManager();
 
     unsigned char** initializeOriginalPixelsFromFile(bool parallelize);
-    unsigned char** initializeTransformedPixels();
+    unsigned char** initializeTransformedPixels(bool parallelize);
     void saveImage(unsigned char** data, int width, int height, int channels);
     void getFileMetadata();
     void showFileInfo() const;

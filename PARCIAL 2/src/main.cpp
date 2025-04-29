@@ -158,7 +158,17 @@ int main(int argc, char *argv[])
     fm.showFileInfo();
 
     ImageManager imgManager(fm.getWidth(), fm.getHeight(), fm.getChannels());
-    unsigned char **transformedPixels = fm.initializeTransformedPixels();
+    unsigned char **transformedPixels;
+
+    if(parallelize_flag == "-p")
+    {
+        transformedPixels = fm.initializeTransformedPixels(true);
+    }
+    else
+    {
+        transformedPixels = fm.initializeTransformedPixels(false);
+    }
+    
 
     Pixel fillColor = {0, 0, 0, 255};
 

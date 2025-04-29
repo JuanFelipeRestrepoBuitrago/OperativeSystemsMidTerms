@@ -50,10 +50,18 @@ FileManager::~FileManager() {
     }
 }
 
-unsigned char** FileManager::allocateMemory(int width, int height, BuddyAllocator* allocator) {
+unsigned char** FileManager::allocateMemory(int width, int height, BuddyAllocator* allocator, bool parallelize) { 
     unsigned char** pixels = new unsigned char*[height];
-    for (int i = 0; i < height; ++i) {
-        pixels[i] = new unsigned char[width];
+    if(parallelize){
+        #pragma omp parallel for shared(pixels) num_threads(4)
+        for (int i = 0; i < height; ++i) {
+            pixels[i] = new unsigned char[width];
+        }
+    }
+    else{
+        for (int i = 0; i < height; ++i) {
+            pixels[i] = new unsigned char[width];
+        }
     }
     return pixels;
 }
@@ -106,7 +114,7 @@ unsigned char** FileManager::initializeOriginalPixelsFromFile(bool parallelize) 
         exit(1);
     }
 
-    originalPixels = allocateMemory(width * channels, height, allocatorOriginalImage);
+    originalPixels = allocateMemory(width * channels, height, allocatorOriginalImage, parallelize);
     if (parallelize){
         #pragma omp parallel for collapse(2) shared(originalPixels, buffer) num_threads(4)
         for (int i = 0; i < height; ++i) {
@@ -128,7 +136,7 @@ unsigned char** FileManager::initializeOriginalPixelsFromFile(bool parallelize) 
     return originalPixels;
 }
 
-unsigned char** FileManager::initializeTransformedPixels() {
+unsigned char** FileManager::initializeTransformedPixels(bool parallelize) {
     /**
      * Get the pixels of the transformed image.
      * 
@@ -151,7 +159,7 @@ unsigned char** FileManager::initializeTransformedPixels() {
         allocatorTransformedImage = new BuddyAllocator(size);
     }
 
-    transformedPixels = allocateMemory(transformedImageWidth * channels, transformedImageHeight, allocatorTransformedImage);
+    transformedPixels = allocateMemory(transformedImageWidth * channels, transformedImageHeight, allocatorTransformedImage, parallelize);
 
     return transformedPixels;
 }
