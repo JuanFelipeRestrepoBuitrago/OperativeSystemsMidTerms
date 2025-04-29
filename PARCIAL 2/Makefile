@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -Wall -Wextra -std=c++17 
+CFLAGS = -Wall -Wextra -std=c++17 -fopenmp
 MACFLAGS = -I/opt/homebrew/opt/googletest/include -L/opt/homebrew/opt/googletest/lib
 TEST_CFLAGS = -I/usr/include/gtest -lgtest -pthread
 SOURCE_DIR = src

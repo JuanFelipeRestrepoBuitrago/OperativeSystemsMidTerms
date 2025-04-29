@@ -27,7 +27,7 @@ void showUsage()
 {
     cout << BOLDCYAN << "\n📘 IMAGE PROCESSING PROGRAM " << PROGRAM_VERSION << RESET << endl;
     cout << BOLDWHITE << "\nUsage:" << RESET << endl;
-    cout << "  ./program <input_file> <output_file> <factor> <-buddy|-no-buddy> <-rotate|-scale>" << endl;
+    cout << "  ./program <input_file> <output_file> <factor> <-buddy|-no-buddy> <-rotate|-scale> <-p | -s>" << endl;
 
     cout << YELLOW << "\nParameters:" << RESET << endl;
     cout << "  <input_file>     📥 Input image file (PNG, JPG, BMP)" << endl;
@@ -37,6 +37,8 @@ void showUsage()
     cout << "  -no-buddy        ⚙️  Use new/delete memory management" << endl;
     cout << "  -rotate          🔄 Rotate the image" << endl;
     cout << "  -scale           📐 Scale the image" << endl;
+    cout << "  -p               📐 Parallelize Process" << endl;
+    cout << "  -s               📐 Sequential Process" << endl;
 
     cout << BOLDWHITE << "\nExample:" << RESET << endl;
     cout << "  ./out/program ./src/tests/images/test.jpg ./out/scaled.jpg 1.5 -buddy -scale" << endl;
@@ -90,7 +92,7 @@ int main(int argc, char *argv[])
     }
 
     // Require 6 arguments
-    if (argc != 6)
+    if (argc != 7)
     {
         cerr << RED << "\n❌ Error: Incorrect number of arguments." << RESET << endl;
         showUsage();
@@ -102,6 +104,7 @@ int main(int argc, char *argv[])
     double factor = stod(argv[3]);
     string allocationMode = argv[4];
     string operation = argv[5];
+    string parallelize_flag = argv[6];
 
     bool useBuddy;
     if (allocationMode == "-buddy")
@@ -134,7 +137,6 @@ int main(int argc, char *argv[])
     TransformationMethod method = (operation == "-rotate") ? TransformationMethod::ROTATION : TransformationMethod::SCALING;
 
     FileManager fm(inputFile, outputFile, method, useBuddy, factor);
-
     unsigned char **originalPixels = fm.initializeOriginalPixelsFromFile();
     if (!originalPixels)
     {
@@ -152,12 +154,27 @@ int main(int argc, char *argv[])
 
     if (operation == "-rotate")
     {
-        imgManager.rotateImage(factor, fillColor, transformedPixels, originalPixels,
-                               fm.getTransformedImageWidth(), fm.getTransformedImageHeight());
+        if (parallelize_flag == "-p")
+        {
+            imgManager.rotateImageParallelize(factor, fillColor, transformedPixels, originalPixels,
+                                               fm.getTransformedImageWidth(), fm.getTransformedImageHeight());
+        }
+        else
+        {
+            imgManager.rotateImage(factor, fillColor, transformedPixels, originalPixels,
+                                   fm.getTransformedImageWidth(), fm.getTransformedImageHeight());
+        }
     }
     else
     {
-        imgManager.scaleImage(factor, transformedPixels, originalPixels);
+        if (parallelize_flag == "-p")
+        {
+            imgManager.scaleImageParallelize(factor, transformedPixels, originalPixels);
+        }
+        else
+        {
+            imgManager.scaleImage(factor, transformedPixels, originalPixels);
+        }
     }
 
     fm.saveImage(transformedPixels,
@@ -174,12 +191,16 @@ int main(int argc, char *argv[])
     cout << CYAN << "🎨 Channels:              " << RESET << fm.getChannels() << endl;
     if (operation == "-rotate")
     {
+        
         cout << CYAN << "🔄 Rotation angle:        " << RESET << factor << "°" << endl;
     }
     else
     {
         cout << CYAN << "📐 Scaling factor:        " << RESET << factor << "x" << endl;
     }
+
+    cout << CYAN << "📐 Parallelism: " << RESET << (parallelize_flag == "-p" ? "YES" : "NO") << endl;
+
 
     cout << BOLDWHITE << "\n⚙️ PERFORMANCE STATS" << RESET << endl;
     cout << YELLOW << "⏱️ Processing time:       " << RESET << duration << " ms" << endl;
