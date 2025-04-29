@@ -1,5 +1,5 @@
 #include "FileManager.h"
-
+#include <omp.h>
 FileManager::FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double factor) {
     /**
      * Constructor for the FileManager class.
@@ -87,7 +87,7 @@ void FileManager::showFileInfo() const {
     std::cout << "Channels: " << channels << std::endl;
 }
 
-unsigned char** FileManager::initializeOriginalPixelsFromFile() {
+unsigned char** FileManager::initializeOriginalPixelsFromFile(bool parallelize) {
     /**
      * Read the pixels of the image from the file.
      * 
@@ -107,9 +107,19 @@ unsigned char** FileManager::initializeOriginalPixelsFromFile() {
     }
 
     originalPixels = allocateMemory(width * channels, height, allocatorOriginalImage);
-    for (int i = 0; i < height; ++i) {
-        for (int j = 0; j < width * channels; ++j) {
-            originalPixels[i][j] = buffer[i * width * channels + j];
+    if (parallelize){
+        #pragma omp parallel for collapse(2) shared(originalPixels, buffer) num_threads(4)
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width * channels; ++j) {
+                originalPixels[i][j] = buffer[i * width * channels + j];
+            }
+        }
+    }
+    else{
+        for (int i = 0; i < height; ++i) {
+            for (int j = 0; j < width * channels; ++j) {
+                originalPixels[i][j] = buffer[i * width * channels + j];
+            }
         }
     }
 

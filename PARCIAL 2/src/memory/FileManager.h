@@ -42,7 +42,7 @@ public:
     FileManager(const std::string& readFilePath, const std::string& writeFilePath, TransformationMethod transformationMethod, bool buddyAllocatorUsage, double factor);
     ~FileManager();
 
-    unsigned char** initializeOriginalPixelsFromFile();
+    unsigned char** initializeOriginalPixelsFromFile(bool parallelize);
     unsigned char** initializeTransformedPixels();
     void saveImage(unsigned char** data, int width, int height, int channels);
     void getFileMetadata();

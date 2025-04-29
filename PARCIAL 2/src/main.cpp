@@ -137,7 +137,17 @@ int main(int argc, char *argv[])
     TransformationMethod method = (operation == "-rotate") ? TransformationMethod::ROTATION : TransformationMethod::SCALING;
 
     FileManager fm(inputFile, outputFile, method, useBuddy, factor);
-    unsigned char **originalPixels = fm.initializeOriginalPixelsFromFile();
+    unsigned char **originalPixels;
+
+    if(parallelize_flag == "-p")
+    {
+        originalPixels = fm.initializeOriginalPixelsFromFile(true);
+    }
+    else
+    {
+        originalPixels = fm.initializeOriginalPixelsFromFile(false);
+    }
+
     if (!originalPixels)
     {
         cerr << RED << "\n❌ Error: Failed to read image: " << inputFile << RESET << endl;
