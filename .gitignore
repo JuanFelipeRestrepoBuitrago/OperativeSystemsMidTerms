@@ -25,3 +25,5 @@ messages/
 *.png
 *.jpg
 *.jpeg
+
+.env
