@@ -27,3 +27,6 @@ messages/
 *.jpeg
 
 .env
+
+# Compressed Files 
+*.perzip

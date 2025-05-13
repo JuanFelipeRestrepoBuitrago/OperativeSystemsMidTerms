@@ -51,6 +51,14 @@ ResultGenerateKeys Rsa::generateKeys() {
 }
 
 std::vector<uint8_t> Rsa::encrypt(const std::vector<uint8_t>& data, const std::string& publicKeyStr) {
+    /**
+     * Function to encrypt the data using the public key
+     * 
+     * @param data: The data to be encrypted
+     * @param publicKeyStr: The public key in string format
+     * 
+     * @return: The encrypted data
+     */
     if (publicKeyStr.empty()) {
         throw std::invalid_argument("No public key provided.");
     }
@@ -87,6 +95,14 @@ std::vector<uint8_t> Rsa::encrypt(const std::vector<uint8_t>& data, const std::s
 }
 
 std::vector<uint8_t> Rsa::decrypt(const std::vector<uint8_t>& data, const std::string& privateKeyStr) {
+    /**
+     * Function to decrypt the data using the private key
+     * 
+     * @param data: The encrypted data to be decrypted
+     * @param privateKeyStr: The private key in string format
+     * 
+     * @return: The decrypted data
+     */
     if (privateKeyStr.empty()) {
         throw std::invalid_argument("No private key provided.");
     }

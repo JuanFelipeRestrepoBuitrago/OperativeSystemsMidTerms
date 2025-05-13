@@ -113,3 +113,92 @@ bool FileManager::saveJsonFile(const std::string& filePath, const json& jsonData
         return false;
     }
 }
+
+ArchiveData FileManager::loadJsonFile(const std::string& filePath) {
+    /**
+     * Function to load JSON data from a file
+     * 
+     * @param filePath: The path of the file from which the JSON data will be loaded
+     * 
+     * @return: A struct containing the loaded JSON data
+     */
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Failed to open input JSON file.");
+    }
+
+    json jsonData;
+    file >> jsonData;
+
+    ArchiveData archive;
+
+    // Validate JSON structure
+    if (!jsonData.is_object()) {
+        throw std::runtime_error("Invalid JSON format: root must be an object");
+    }
+
+    // Extract public_key
+    if (!jsonData.contains("public_key") || !jsonData["public_key"].is_string()) {
+        throw std::runtime_error("Invalid JSON: missing or invalid 'public_key'");
+    }
+    archive.public_key = jsonData["public_key"].get<std::string>();
+
+    // Extract private_key
+    if (!jsonData.contains("private_key") || !jsonData["private_key"].is_string()) {
+        throw std::runtime_error("Invalid JSON: missing or invalid 'private_key'");
+    }
+    archive.private_key = jsonData["private_key"].get<std::string>();
+
+    // Extract files
+    if (!jsonData.contains("files") || !jsonData["files"].is_array()) {
+        throw std::runtime_error("Invalid JSON: missing or invalid 'files' array");
+    }
+
+    for (const auto& fileEntryJson : jsonData["files"]) {
+        if (!fileEntryJson.is_object()) {
+            std::cerr << "Warning: Skipping invalid file entry (not an object)" << std::endl;
+            continue;
+        }
+
+        FileEntry fileEntry;
+
+        if (!fileEntryJson.contains("file_name") || !fileEntryJson["file_name"].is_string()) {
+            std::cerr << "Warning: Missing or invalid 'file_name' in file entry" << std::endl;
+            continue;
+        }
+        fileEntry.file_name = fileEntryJson["file_name"].get<std::string>();
+
+        if (!fileEntryJson.contains("file_data") || !fileEntryJson["file_data"].is_string()) {
+            std::cerr << "Warning: Missing or invalid 'file_data' in file entry" << std::endl;
+            continue;
+        }
+        fileEntry.file_data = fileEntryJson["file_data"].get<std::string>();
+
+        if (!fileEntryJson.contains("huffman_table") || !fileEntryJson["huffman_table"].is_array()) {
+            std::cerr << "Warning: Missing or invalid 'huffman_table' in file entry" << std::endl;
+            continue;
+        }
+        for (const auto& tableEntry : fileEntryJson["huffman_table"]) {
+            if (!tableEntry.is_object() ||
+                !tableEntry.contains("letter") || !(tableEntry["letter"].is_number_unsigned()
+                    || tableEntry["letter"].is_number_integer()) ||
+                !tableEntry.contains("code") || !tableEntry["code"].is_string()) {
+                std::cerr << "Warning: Skipping invalid Huffman table entry in " << fileEntry.file_name << std::endl;
+                continue;
+            }
+            int letterVal = tableEntry["letter"].get<int>();
+            char letter = static_cast<char>(letterVal);
+            std::string code = tableEntry["code"].get<std::string>();
+            fileEntry.huffman_table[code] = letter;
+        }
+        archive.files.push_back(fileEntry);
+    }
+
+    if (archive.files.empty()) {
+        throw std::runtime_error("Invalid JSON: no valid files found");
+    }
+
+    // Close and clean up
+    file.close();
+    return archive;
+}

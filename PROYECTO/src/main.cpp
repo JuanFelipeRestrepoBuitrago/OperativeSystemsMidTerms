@@ -208,6 +208,28 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    else if (option == "--show" || option == "-s") {
+        /* code */
+        if (argc < 3) {
+            printUsage(argv[0]);
+            return 1;
+        }
+        std::string inputFile = argv[2];
+
+        ArchiveData archive = FileManager::loadJsonFile(inputFile);
+
+        std::vector<std::string> file_names;
+        for (size_t i = 0; i < archive.files.size(); i++) {
+            file_names.push_back(archive.files[i].file_name);
+        }
+        std::sort(file_names.begin(), file_names.end());
+
+        std::cout << "Files in " << inputFile << ":\n";
+        for (const auto& file_name : file_names) {
+            std::cout << "  - " << file_name << std::endl;
+        }
+    }
+
     else {
         std::cerr << "Error: Unknown option '" << option << "'." << std::endl;
         printUsage(argv[0]);
