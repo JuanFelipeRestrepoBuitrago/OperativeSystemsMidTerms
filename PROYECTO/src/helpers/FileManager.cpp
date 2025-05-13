@@ -2,60 +2,6 @@
 
 namespace fs = std::filesystem;
 
-std::vector<char> FileManager::readTextFile(const std::string& filePath) {
-    /**
-     * Function to read the contents of a file
-     * 
-     * @param filePath: The path of the file to be read
-     * 
-     * @return: A vector containing the file contents as characters
-     */
-    int fd = open(filePath.c_str(), O_RDONLY); // Open the file in read-only mode
-    if (fd == -1) {
-        perror("Error opening file for reading");
-        exit(EXIT_FAILURE);
-    }
-
-    std::vector<char> buffer;
-    char chunk[4096]; // Temporary buffer to read the file in 4096-byte chunks
-    ssize_t bytesRead;
-
-    while ((bytesRead = read(fd, chunk, sizeof(chunk))) > 0) {
-        buffer.insert(buffer.end(), chunk, chunk + bytesRead);
-    }
-
-    if (bytesRead == -1) {
-        perror("Error reading from file");
-    }
-
-    close(fd); // Close the file after reading
-    return buffer;
-}
-
-void FileManager::writeTextFile(const std::string& filePath, const std::vector<char>& data) {
-    /**
-     * Function to write data to a file
-     * 
-     * @param filePath: The path of the file to be written to
-     * @param data: The data to be written to the file
-     * 
-     * @return: None
-     */
-    int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644); // Open the file for writing, create if not exists, truncate if exists
-    if (fd == -1) {
-        perror("Error opening file for writing");
-        exit(EXIT_FAILURE);
-    }
-
-    ssize_t bytesWritten = write(fd, data.data(), data.size());
-
-    if (bytesWritten == -1) {
-        perror("Error writing to file");
-    }
-
-    close(fd);
-}
-
 void FileManager::writeBinaryFile(const std::string& filePath, const std::vector<char>& data) {
     /**
      * Function to write compressed bit data to a file
@@ -100,46 +46,23 @@ void FileManager::writeBinaryFile(const std::string& filePath, const std::vector
     close(fd);
 }
 
-std::vector<char> FileManager::readBinaryFile(const std::string& filePath) {
-    /**
-     * Function to read compressed bit data from a file
-     * 
-     * @param filePath: The path of the file from which the bit data will be read
-     * 
-     * @return: A vector containing the decompressed bit data
-     */
-    int fd = open(filePath.c_str(), O_RDONLY);
-    if (fd == -1) {
-        perror("Error opening file for reading");
-        exit(EXIT_FAILURE);
+std::vector<uint8_t> FileManager::readBinaryFile(const std::string& path) {
+    std::ifstream in{path, std::ios::binary | std::ios::ate};
+    if (!in) {
+        throw std::runtime_error("Cannot open file: " + path);
     }
 
-    uint8_t validBits;
-    if (read(fd, &validBits, 1) != 1) {
-        perror("Error reading validBits");
-        close(fd);
-        exit(EXIT_FAILURE);
+    // determine size and rewind
+    std::streamsize size = in.tellg();
+    in.seekg(0, std::ios::beg);
+
+    // read all bytes
+    std::vector<uint8_t> buffer(size);
+    if (!in.read(reinterpret_cast<char*>(buffer.data()), size)) {
+        throw std::runtime_error("Failed to read file: " + path);
     }
 
-    std::vector<uint8_t> byteData;
-    uint8_t byte;
-    while (read(fd, &byte, 1)) {
-        byteData.push_back(byte);
-    }
-    close(fd);
-
-    std::vector<char> data;
-    for (size_t i = 0; i < byteData.size(); ++i) {
-        uint8_t currentByte = byteData[i];
-        int bitsToRead = (i == byteData.size() - 1) ? validBits : 8;
-        
-        for (int j = bitsToRead - 1; j >= 0; --j) {
-            char bit = ((currentByte >> j) & 1) ? '1' : '0';
-            data.push_back(bit);
-        }
-    }
-
-    return data;
+    return buffer;
 }
 
 std::vector<std::string> FileManager::getAllFilestoProcess(const std::string& path) {

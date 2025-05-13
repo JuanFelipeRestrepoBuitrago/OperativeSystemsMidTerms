@@ -34,8 +34,8 @@ public:
     Rsa(int p, int q);
     ~Rsa();
     ResultGenerateKeys generateKeys();
-    char* encrypt(const char* message, const char* publicKey = nullptr);
-    char* decrypt(const char* message, const char* privateKey = nullptr);
+    std::vector<uint8_t> encrypt(const std::vector<uint8_t>& data, const std::string& publicKey);
+    std::vector<uint8_t> decrypt(const std::vector<uint8_t>& data, const std::string& privateKey);
     char* getPublicKey();
     char* getPrivateKey();
     void setPublicKey(const char* publicKey);

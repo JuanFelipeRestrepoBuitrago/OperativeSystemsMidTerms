@@ -53,7 +53,7 @@ void printVersion() {
     std::cout << "RSA function version 1.0" << std::endl;
 }
 
-json generateInitialJson(const char* publicKey, const char* privateKey) {
+json compress(std::vector<std::string> files, const char* publicKey, const char* privateKey, Rsa& rsa_management) {
     // Create JSON object
     json jsonData;
     
@@ -61,6 +61,35 @@ json generateInitialJson(const char* publicKey, const char* privateKey) {
     jsonData["private_key"] = privateKey;  
     jsonData["huffman_table"] = json::array();
     jsonData["files"] = json::array();
+
+    for (size_t i = 0; i < files.size(); i++) {        
+        // Read the file
+        std::vector<uint8_t> fileData = FileManager::readBinaryFile(files[i]);
+        if (fileData.empty()) {
+            std::cerr << "Warning: File " << files[i] << " is empty or could not be read." << std::endl;
+            continue;
+        }
+        
+        std::vector<uint8_t> encryptedData = rsa_management.encrypt(fileData, publicKey);
+        if (encryptedData.empty()) {
+            std::cerr << "Warning: Failed to encrypt file " << files[i] << std::endl;
+            continue;
+        }
+
+        std::vector<uint8_t> decryptedData = rsa_management.decrypt(encryptedData, privateKey);
+        if (decryptedData.empty()) {
+            std::cerr << "Warning: Failed to decrypt file " << files[i] << std::endl;
+            continue;
+        }
+
+        // Check if the decrypted data matches the original data
+        if (fileData != decryptedData) {
+            std::cerr << "Warning: Decrypted data does not match original data for file " << files[i] << std::endl;
+            continue;
+        }
+
+        jsonData["files"].push_back({{"file_name", files[i]}, {"file_data", fileData}});
+    }
 
     // Return the JSON object
     return jsonData;
@@ -121,18 +150,14 @@ int main(int argc, char* argv[]) {
 
         ResultGenerateKeys keys = rsa_management.generateKeys();
 
-        json jsonData = generateInitialJson(keys.publicKey, keys.privateKey);
-
         std::vector<std::string> allFiles = FileManager::getAllFilestoProcess(argv[2]);
-        std::cout << "Files found:\n";
-        for (const auto& file : allFiles) {
-            std::cout << file << std::endl;
-        }
 
         if (allFiles.empty()) {
             std::cerr << "Error: No files found to process." << std::endl;
             return 1;
         }
+
+        json jsonData = compress(allFiles, keys.publicKey, keys.privateKey, rsa_management);
 
         if (FileManager::saveJsonFile(argv[3], jsonData)) {
             std::cout << "JSON file created successfully." << std::endl;

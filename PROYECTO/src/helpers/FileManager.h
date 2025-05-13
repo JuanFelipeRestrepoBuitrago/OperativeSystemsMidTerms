@@ -15,9 +15,7 @@ using json = nlohmann::json;
 
 class FileManager {
 public:
-    static std::vector<char> readTextFile(const std::string& filePath);
-    static std::vector<char> readBinaryFile(const std::string& filePath);
-    static void writeTextFile(const std::string& filePath, const std::vector<char>& data);
+    static std::vector<uint8_t> readBinaryFile(const std::string& filePath);
     static void writeBinaryFile(const std::string& filePath, const std::vector<char>& data);
     static std::vector<std::string> getAllFilestoProcess(const std::string& path);
     static bool saveJsonFile(const std::string& filePath, const json& jsonData);
