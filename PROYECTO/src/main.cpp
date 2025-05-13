@@ -6,15 +6,9 @@
 #include "./helpers/FileManager.h"
 #include <cstring> 
 #include <cstdlib>
+#include "../libs/json.hpp"
 
-// Default file paths for keys and messages
-const char* defaultPublicKeyPath = "keys/public_key.txt";
-const char* defaultPrivateKeyPath = "keys/private_key.txt";
-const char* encryptedMessagePath = "messages/encrypted_message.txt";
-const char* compressedMessagePath = "messages/compressed_message.bin";
-const char* decompressedMessagePath = "messages/decompressed_message.txt";
-const char* decryptedMessagePath = "messages/decrypted_message.txt";
-const char* huffmanTablePath = "messages/huffman_table.txt";
+using json = nlohmann::json;
 
 void printUsage(const char* programName) {
     /**
@@ -40,18 +34,13 @@ void printHelp(const char* programName) {
     std::cout << "Options:\n";
     std::cout << "  --help, -h         Show this help message\n";
     std::cout << "  --version, -v      Show RSA function version\n";
-    std::cout << "  --generate         Generate public and private RSA keys\n";
-    std::cout << "  --skeys            Show stored public and private keys\n";
-    std::cout << "  --encrypt, -e      Encrypt a message file using a public key\n";
     std::cout << "  --compress, -c     Compress a file\n";
-    std::cout << "  --decompress, -x   Decompress a file\n";
-    std::cout << "  --decrypt, -d      Decrypt a message file using a private key\n";
+    std::cout << "  --decompress, -d   Decompress a file\n";
+    std::cout << "  --show, -s       Show the inner files of a compressed file\n";
     std::cout << "\nExamples:\n";
-    std::cout << "  " << programName << " --generate\n";
-    std::cout << "  " << programName << " --encrypt messages/original_message.txt keys/public_key.txt\n";
-    std::cout << "  " << programName << " --compress messages/encripted_message.txt\n";
-    std::cout << "  " << programName << " --decompress messages/compressed_message.bin\n";
-    std::cout << "  " << programName << " --decrypt messages/decompressed_message.txt keys/private_key.txt\n";
+    std::cout << "  " << programName << " --compress $INPUT_FILE $OUTPUT_FILE(the '.perzip' extension must be included in the $OUTPUTFILE)\n";
+    std::cout << "  " << programName << " --decompress $INPUT_FILE $OUTPUT_FILE $REGEX_OF_FILES_TO_EXTRACT\n";
+    std::cout << "  " << programName << " --show $INPUT_FILE\n";
     std::cout << std::endl;
 }
 
@@ -64,16 +53,17 @@ void printVersion() {
     std::cout << "RSA function version 1.0" << std::endl;
 }
 
-std::string readTextFileAsString(const char* filePath) {
-    /**
-     * Function to read the contents of a file and return it as a string
-     * 
-     * @param filePath: The path of the file to be read
-     * 
-     * @return: A string containing the file contents
-     */
-    std::vector<char> content = FileManager::readTextFile(filePath);
-    return std::string(content.begin(), content.end());
+json generateInitialJson(const char* publicKey, const char* privateKey) {
+    // Create JSON object
+    json jsonData;
+    
+    jsonData["public_key"] = publicKey;
+    jsonData["private_key"] = privateKey;  
+    jsonData["huffman_table"] = json::array();
+    jsonData["files"] = json::array();
+
+    // Return the JSON object
+    return jsonData;
 }
 
 int main(int argc, char* argv[]) {
@@ -122,113 +112,48 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    else if (option == "--generate") {
-        /**
-         * Generate RSA public and private keys and save them to files
-         */
-        ResultGenerateKeys keys = rsa_management.generateKeys();
-        FileManager::writeTextFile(defaultPublicKeyPath, 
-            std::vector<char>(keys.publicKey, keys.publicKey + std::strlen(keys.publicKey)));
-        FileManager::writeTextFile(defaultPrivateKeyPath, 
-            std::vector<char>(keys.privateKey, keys.privateKey + std::strlen(keys.privateKey)));
-        std::cout << "Public and private keys generated successfully." << std::endl;
-        return 0;
-    } 
-
-    else if (option == "--skeys") {
-        /**
-         * Retrieve and display stored public and private keys
-         */
-        std::string privateKey = readTextFileAsString(defaultPrivateKeyPath);
-        std::string publicKey = readTextFileAsString(defaultPublicKeyPath);
-        std::cout << "Private Key: " << privateKey << "\nPublic Key: " << publicKey << std::endl;
-        return 0;
-    }
-
-    else if (option == "--encrypt" || option == "-e") {
-        /**
-         * Encrypt a message file using the provided public key
-         */
+    else if (option == "--compress" || option == "-c"){
+        /* code */
         if (argc < 4) {
             printUsage(argv[0]);
             return 1;
         }
+
+        ResultGenerateKeys keys = rsa_management.generateKeys();
+
+        json jsonData = generateInitialJson(keys.publicKey, keys.privateKey);
+
         std::vector<std::string> allFiles = FileManager::getAllFilestoProcess(argv[2]);
         std::cout << "Files found:\n";
         for (const auto& file : allFiles) {
             std::cout << file << std::endl;
         }
-        // std::string message = readTextFileAsString(argv[2]);
-        // std::string publicKey = readTextFileAsString(argv[3]);
-        // char* encryptedMessage = rsa_management.encrypt(message.c_str(), publicKey.c_str());
-        
-        // FileManager::writeTextFile(encryptedMessagePath,
-        //     std::vector<char>(encryptedMessage, encryptedMessage + std::strlen(encryptedMessage)));
-        // std::cout << "Message encrypted successfully in " << encryptedMessagePath << std::endl;
 
-        return 0;
-    }
-
-    else if (option == "--compress" || option == "-c") {
-        /**
-         * Compress a file using Huffman encoding
-         */
-        if (argc < 3) {
-            printUsage(argv[0]);
+        if (allFiles.empty()) {
+            std::cerr << "Error: No files found to process." << std::endl;
             return 1;
         }
-    
-        std::vector<char> messageContent = FileManager::readTextFile(argv[2]);
-        std::unordered_map<char, int> freqMap = Utils::createFreqMap(messageContent);
-        huffman.buildTree(freqMap);
-        std::vector<char> compressedMessage = huffman.compress(messageContent);
-        
-        std::unordered_map<std::string, char> reverseCodes = huffman.getReverseCodes();
-        Utils::saveHuffmanTable(reverseCodes, huffmanTablePath);
 
-        FileManager::writeBinaryFile(compressedMessagePath, compressedMessage);
-        std::cout << "Message compressed successfully in " << compressedMessagePath << std::endl;
-        
-        return 0;
-    }
-
-    else if (option == "--decompress" || option == "-x") {
-        /**
-         * Decompress a file using Huffman encoding
-         */
-        if (argc < 3) {
-            printUsage(argv[0]);
+        if (FileManager::saveJsonFile(argv[3], jsonData)) {
+            std::cout << "JSON file created successfully." << std::endl;
+        } else {
+            std::cerr << "Error: Failed to create JSON file." << std::endl;
             return 1;
         }
-    
-        std::vector<char> messageContent = FileManager::readBinaryFile(argv[2]);
-        std::unordered_map<std::string, char> reverseCodes = Utils::loadHuffmanTable(huffmanTablePath);
-        std::vector<char> decompressedMessage = huffman.uncompress(messageContent, &reverseCodes);
-
-        FileManager::writeTextFile(decompressedMessagePath, decompressedMessage);
-        std::cout << "Message decompressed successfully in " << decompressedMessagePath << std::endl;
-    
-        return 0;
     }
 
-    else if (option == "--decrypt" || option == "-d") {
-        /**
-         * Decrypt an encrypted message file using the private key
-         */
+    else if (option == "--decompress" || option == "-d") {
+        /* code */
         if (argc < 4) {
             printUsage(argv[0]);
             return 1;
         }
-        std::string encryptedMessage = readTextFileAsString(argv[2]);
-        std::string privateKey = readTextFileAsString(argv[3]);
-        char* decryptedMessage = rsa_management.decrypt(encryptedMessage.c_str(), privateKey.c_str());
-
-        FileManager::writeTextFile(decryptedMessagePath, 
-            std::vector<char>(decryptedMessage, decryptedMessage + std::strlen(decryptedMessage)));
-        std::cout << "Message decrypted successfully in " << decryptedMessagePath << std::endl;
-
-        return 0;
     }
 
+    else {
+        std::cerr << "Error: Unknown option '" << option << "'." << std::endl;
+        printUsage(argv[0]);
+        return 1;
+    }
     return 0;
 }

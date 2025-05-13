@@ -166,3 +166,27 @@ std::vector<std::string> FileManager::getAllFilestoProcess(const std::string& pa
 
     return files;
 }
+
+bool FileManager::saveJsonFile(const std::string& filePath, const json& jsonData) {
+    /**
+     * Function to save JSON data to a file
+     * 
+     * @param filePath: The path of the file where the JSON data will be saved
+     * @param jsonData: The JSON data to be saved
+     * 
+     * @return: None
+     */
+    std::ofstream file(filePath);
+    if (!file) {
+        std::cerr << "Failed to open output JSON file." << std::endl;
+        return false;
+    }
+    else if (file.is_open()) {
+        file << jsonData.dump(4); // Pretty print with 4 spaces indentation
+        file.close();
+        return true;
+    } else {
+        std::cerr << "Error opening file for writing JSON data." << std::endl;
+        return false;
+    }
+}

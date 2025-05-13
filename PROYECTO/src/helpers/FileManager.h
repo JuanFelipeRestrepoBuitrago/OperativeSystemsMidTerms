@@ -8,6 +8,10 @@
 #include <cstdint> 
 #include <iostream>
 #include <filesystem>
+#include <fstream>
+#include "../libs/json.hpp"
+
+using json = nlohmann::json;
 
 class FileManager {
 public:
@@ -16,6 +20,7 @@ public:
     static void writeTextFile(const std::string& filePath, const std::vector<char>& data);
     static void writeBinaryFile(const std::string& filePath, const std::vector<char>& data);
     static std::vector<std::string> getAllFilestoProcess(const std::string& path);
+    static bool saveJsonFile(const std::string& filePath, const json& jsonData);
 };
 
 #endif

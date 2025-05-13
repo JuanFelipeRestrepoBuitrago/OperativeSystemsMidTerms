@@ -1,15 +1,22 @@
 CC = g++
-CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest
+CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest -Ilibs -I$(SOURCE_DIR)
 LDFLAGS = -lgtest -lgtest_main -pthread -lcrypto
 MACFLAGS = -I/opt/homebrew/opt/openssl@3/include -I/opt/homebrew/opt/googletest/include -L/opt/homebrew/opt/openssl@3/lib -L/opt/homebrew/opt/googletest/lib
 
 SOURCE_DIR = src
 OUTDIR = out
+LIB_DIR = libs
 
-all: $(OUTDIR)/rsa
-compile: $(OUTDIR)/rsa
+# Detect operating system
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    CFLAGS += $(MACFLAGS)
+endif
 
-$(OUTDIR)/rsa: $(OUTDIR)/$(SOURCE_DIR)/main.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o $(OUTDIR)/$(SOURCE_DIR)/core/Huffman.o
+all: $(OUTDIR)/perzip
+compile: $(OUTDIR)/perzip
+
+$(OUTDIR)/perzip: $(OUTDIR)/$(SOURCE_DIR)/main.o $(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o $(OUTDIR)/$(SOURCE_DIR)/helpers/Utils.o $(OUTDIR)/$(SOURCE_DIR)/core/RSA.o $(OUTDIR)/$(SOURCE_DIR)/core/Huffman.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 TEST_DIR = src/tests/core
@@ -55,11 +62,11 @@ $(OUTDIR)/$(TEST_DIR)/testHuffman.o: $(TEST_DIR)/testHuffman.cpp $(SOURCE_DIR)/c
 # Compile Source Files
 
 # Compile main.cpp
-$(OUTDIR)/$(SOURCE_DIR)/main.o: $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/FileManager.h $(SOURCE_DIR)/helpers/Utils.h | $(OUTDIR)/$(SOURCE_DIR)
+$(OUTDIR)/$(SOURCE_DIR)/main.o: $(SOURCE_DIR)/main.cpp $(SOURCE_DIR)/core/RSA.h $(SOURCE_DIR)/helpers/FileManager.h $(SOURCE_DIR)/helpers/Utils.h $(LIB_DIR)/json.hpp | $(OUTDIR)/$(SOURCE_DIR)
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile FileManager.cpp
-$(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o: $(SOURCE_DIR)/helpers/FileManager.cpp $(SOURCE_DIR)/helpers/FileManager.h | $(OUTDIR)/$(SOURCE_DIR)/helpers
+$(OUTDIR)/$(SOURCE_DIR)/helpers/FileManager.o: $(SOURCE_DIR)/helpers/FileManager.cpp $(SOURCE_DIR)/helpers/FileManager.h $(LIB_DIR)/json.hpp | $(OUTDIR)/$(SOURCE_DIR)/helpers
 	$(CC) $(CFLAGS) -c $(word 1, $^) -o $@
 
 # Compile Utils.cpp (AHORA DEPENDE DE FileManager.o)
