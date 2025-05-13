@@ -7,6 +7,7 @@
 #include <cstring> 
 #include <cstdlib>
 #include "../libs/json.hpp"
+#include <regex>
 
 using json = nlohmann::json;
 
@@ -53,13 +54,12 @@ void printVersion() {
     std::cout << "RSA function version 1.0" << std::endl;
 }
 
-json compress(std::vector<std::string> files, const char* publicKey, const char* privateKey, Rsa& rsa_management) {
+json compress(std::vector<std::string> files, const char* publicKey, const char* privateKey, Rsa& rsa_management, Huffman& huffman) {
     // Create JSON object
     json jsonData;
     
     jsonData["public_key"] = publicKey;
     jsonData["private_key"] = privateKey;  
-    jsonData["huffman_table"] = json::array();
     jsonData["files"] = json::array();
 
     for (size_t i = 0; i < files.size(); i++) {        
@@ -76,19 +76,44 @@ json compress(std::vector<std::string> files, const char* publicKey, const char*
             continue;
         }
 
-        std::vector<uint8_t> decryptedData = rsa_management.decrypt(encryptedData, privateKey);
-        if (decryptedData.empty()) {
-            std::cerr << "Warning: Failed to decrypt file " << files[i] << std::endl;
+        // Convert the encrypted data to vector of characters
+        std::vector<char> encryptedDataChars(encryptedData.begin(), encryptedData.end());
+
+        std::unordered_map<char, int> freqMap = Utils::createFreqMap(encryptedDataChars);
+        if (freqMap.empty()) {
+            std::cerr << "Warning: Frequency map is empty for file " << files[i] << std::endl;
+            continue;
+        }
+        huffman.buildTree(freqMap);
+        std::vector<char> compressedData = huffman.compress(encryptedDataChars);
+        if (compressedData.empty()) {
+            std::cerr << "Warning: Failed to compress file " << files[i] << std::endl;
+            continue;
+        }
+        // Convert the compressed data to a vector of uint8_t
+        std::vector<uint8_t> compressedDataUint8(compressedData.begin(), compressedData.end());
+        std::string encodedData = Utils::binaryToBase64(compressedDataUint8);
+
+        std::unordered_map<std::string, char> reverseCodes = huffman.getReverseCodes();
+        if (reverseCodes.empty()) {
+            std::cerr << "Warning: Reverse codes are empty for file " << files[i] << std::endl;
             continue;
         }
 
-        // Check if the decrypted data matches the original data
-        if (fileData != decryptedData) {
-            std::cerr << "Warning: Decrypted data does not match original data for file " << files[i] << std::endl;
-            continue;
+        json fileEntry;
+        // Save the name of the file removing ./ or ../ or any secuence of them with regex
+        fileEntry["file_name"] = std::regex_replace(files[i], std::regex(R"(\.{1,2}[/])"), "");
+        fileEntry["file_data"] = encodedData;
+        fileEntry["huffman_table"] = json::array();
+
+        for (const auto& pair : reverseCodes) {
+            json tableEntry;
+            tableEntry["letter"] = pair.second;
+            tableEntry["code"] = pair.first;
+            fileEntry["huffman_table"].push_back(tableEntry);
         }
 
-        jsonData["files"].push_back({{"file_name", files[i]}, {"file_data", fileData}});
+        jsonData["files"].push_back(fileEntry);
     }
 
     // Return the JSON object
@@ -148,6 +173,14 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
+        // Check the extension of the output file
+        std::string outputFile = argv[3];
+        if (outputFile.substr(outputFile.find_last_of(".") + 1) != "perzip") {
+            std::cerr << "Error: Output file must have the '.perzip' extension." << std::endl;
+            printUsage(argv[0]);
+            return 1;
+        }
+
         ResultGenerateKeys keys = rsa_management.generateKeys();
 
         std::vector<std::string> allFiles = FileManager::getAllFilestoProcess(argv[2]);
@@ -157,7 +190,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        json jsonData = compress(allFiles, keys.publicKey, keys.privateKey, rsa_management);
+        json jsonData = compress(allFiles, keys.publicKey, keys.privateKey, rsa_management, huffman);
 
         if (FileManager::saveJsonFile(argv[3], jsonData)) {
             std::cout << "JSON file created successfully." << std::endl;
