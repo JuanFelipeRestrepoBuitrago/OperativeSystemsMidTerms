@@ -170,20 +170,40 @@ void decompress(const char* inputFile, const char* outputFile, std::string regex
             outputFileName += std::regex_replace(fileName, std::regex(regexStr.substr(0, regexStr.find_last_of("/"))), "");
         }
 
-        std::cout << "Decompressing file: " << outputFileName << std::endl;
+        std::cout << "Decompressing file: " << fileName << " to " << outputFileName << std::endl;
 
-        // Check if the regex
-        // std::string fileData = fileEntry.file_data;
+        std::string fileData = fileEntry.file_data;
 
-        // // Decode the Base64 data
-        // std::vector<uint8_t> decodedData = Utils::base64ToBinary(fileData.c_str());
+        // Decode the Base64 data
+        std::vector<uint8_t> decodedData = Utils::base64ToBinary(fileData.c_str());
+        std::vector<char> decodedDataChars(decodedData.begin(), decodedData.end());
 
-        // // Decompress the data using Huffman
-        // std::unordered_map<std::string, char> reverseCodes = fileEntry.huffman_table;
-        // std::vector<char> decompressedData = huffman.uncompress(decodedData, &reverseCodes);
+        // Decompress the data using Huffman
+        std::unordered_map<std::string, char> reverseCodes = fileEntry.huffman_table;
+        std::vector<char> decompressedData = huffman.uncompress(decodedDataChars, &reverseCodes);
+        if (decompressedData.empty()) {
+            std::cerr << "Warning: Failed to decompress file " << fileName << std::endl;
+            continue;
+        }
+        std::vector<uint8_t> decompressedDataUint8(decompressedData.begin(), decompressedData.end());
 
-        // // Save the decompressed data to a file
-        // FileManager::writeBinaryFile(outputFile, decompressedData);
+        // Decrypt the data using RSA
+        std::vector<uint8_t> decryptedData = rsa_management.decrypt(decompressedDataUint8, archive.private_key);
+        if (decryptedData.empty()) {
+            std::cerr << "Warning: Failed to decrypt file " << fileName << std::endl;
+            continue;
+        }
+        // Create the output directory if it doesn't exist
+        std::filesystem::path outputPath(outputFileName.substr(0, outputFileName.find_last_of("/")));
+        if (!std::filesystem::exists(outputPath)) {
+            std::filesystem::create_directories(outputPath);
+        }
+
+        if (FileManager::writeBinaryFile(outputFileName, decryptedData)) {
+            std::cout << "Decompressed file saved to: " << outputFileName << std::endl;
+        } else {
+            std::cerr << "Error: Failed to save decompressed file " << outputFileName << std::endl;
+        }
     }
 }
 

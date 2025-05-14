@@ -30,6 +30,7 @@ class FileManager {
 public:
     static std::vector<uint8_t> readBinaryFile(const std::string& filePath);
     static void writeBinaryFile(const std::string& filePath, const std::vector<char>& data);
+    static bool writeBinaryFile(const std::string& filePath, const std::vector<uint8_t>& data);
     static std::vector<std::string> getAllFilestoProcess(const std::string& path);
     static bool saveJsonFile(const std::string& filePath, const json& jsonData);
     static ArchiveData loadJsonFile(const std::string& filePath);

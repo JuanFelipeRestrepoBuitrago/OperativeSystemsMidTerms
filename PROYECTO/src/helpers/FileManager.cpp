@@ -46,6 +46,26 @@ void FileManager::writeBinaryFile(const std::string& filePath, const std::vector
     close(fd);
 }
 
+bool FileManager::writeBinaryFile(const std::string& filePath, const std::vector<uint8_t>& data) {
+    /**
+     * Function to write binary data to a file
+     * 
+     * @param filePath: The path of the file where the binary data will be written
+     * @param data: The binary data to be written
+     * 
+     * @return: bool indicating success or failure
+     */
+    int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd == -1) {
+        perror("Error opening file for writing");
+        return false;
+    }
+
+    write(fd, data.data(), data.size());
+    close(fd);
+    return true;
+}
+
 std::vector<uint8_t> FileManager::readBinaryFile(const std::string& path) {
     std::ifstream in{path, std::ios::binary | std::ios::ate};
     if (!in) {
