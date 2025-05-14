@@ -120,6 +120,73 @@ json compress(std::vector<std::string> files, const char* publicKey, const char*
     return jsonData;
 }
 
+void decompress(const char* inputFile, const char* outputFile, std::string regexStr, Rsa& rsa_management, Huffman& huffman) {
+    /**
+     * Function to decompress a file using the provided regex
+     * 
+     * @param inputFile: The path of the input file to be decompressed
+     * @param outputFile: The path of the output file to save the decompressed data
+     * @param regexStr: The regex string to filter files
+     * 
+     * @return: None
+     */
+    // Load the JSON file
+    ArchiveData archive = FileManager::loadJsonFile(inputFile);
+
+    // Normalize regexStr
+    bool withoutExternalFolder = false;
+    if (regexStr.empty()) {
+        regexStr = ""; // Default to match all
+    } else {
+        // Check for /* to set extractJustFiles
+        if (regexStr.size() >= 2 && regexStr.substr(regexStr.size() - 2) == "/*") {
+            withoutExternalFolder = true;
+            regexStr = regexStr.substr(0, regexStr.size() - 2);
+        }
+        // Clean regex: remove leading ./, trailing /, replace standalone . with empty
+        regexStr = std::regex_replace(regexStr, std::regex(R"(^\./|/$)"), "");
+        if (regexStr == ".") {
+            regexStr = "";
+        }
+    }
+
+    // Decompress the files
+    for (const auto& fileEntry : archive.files) {
+        std::string fileName = fileEntry.file_name;
+
+        // Check the file name contains the regex
+        if (!std::regex_search(fileName, std::regex(regexStr))) {
+            continue;
+        }
+
+        // Replace the matching part of the file name with output_file/
+        std::string outputFileName = outputFile;
+        if (regexStr.empty()) {
+            outputFileName += "/" + fileName;
+        }
+        else if (withoutExternalFolder) {
+            outputFileName += std::regex_replace(fileName, std::regex(regexStr), "");
+        } else {
+            outputFileName += std::regex_replace(fileName, std::regex(regexStr.substr(0, regexStr.find_last_of("/"))), "");
+        }
+
+        std::cout << "Decompressing file: " << outputFileName << std::endl;
+
+        // Check if the regex
+        // std::string fileData = fileEntry.file_data;
+
+        // // Decode the Base64 data
+        // std::vector<uint8_t> decodedData = Utils::base64ToBinary(fileData.c_str());
+
+        // // Decompress the data using Huffman
+        // std::unordered_map<std::string, char> reverseCodes = fileEntry.huffman_table;
+        // std::vector<char> decompressedData = huffman.uncompress(decodedData, &reverseCodes);
+
+        // // Save the decompressed data to a file
+        // FileManager::writeBinaryFile(outputFile, decompressedData);
+    }
+}
+
 int main(int argc, char* argv[]) {
     /**
      * Main function of the program
@@ -206,6 +273,17 @@ int main(int argc, char* argv[]) {
             printUsage(argv[0]);
             return 1;
         }
+
+        // Check if the output file is a directory
+        if (!std::filesystem::is_directory(argv[3])) {
+            std::cerr << "Error: Output file must be a directory." << std::endl;
+            return 1;
+        }
+        std::string inputFile = argv[2];
+        std::string outputFile = argv[3];
+        std::string regexStr = argc > 4 ? argv[4] : "";
+
+        decompress(inputFile.c_str(), outputFile.c_str(), regexStr, rsa_management, huffman);
     }
 
     else if (option == "--show" || option == "-s") {
