@@ -1,5 +1,5 @@
-# RSA Encryption with Run-Length Encoding (Huffman)
-For the exam of operating systems subject we created a system function that uses system calls to encrypt files using RSA and compress them using Huffman.
+# Compression and Decompression of files using RSA and Huffman
+For the final project, we will implement a program that compresses and decompresses files using the **RSA** algorithm and **Huffman** encoding. The program will be implemented in **C++**.
 
 ## Background
 
@@ -116,13 +116,25 @@ To run the project, you have to follow the next steps:
 
 2. Run one of the following commands:
     ```bash
-    ./out/rsa --help
+    ./out/perzip --help
     ```
     ```bash
-    ./out/rsa -h
+    ./out/perzip -h
     ```
 
 Or you can run the following command if you are in the out directory:
 ```bash
-./rsa --help
+./perzip --help
 ```
+
+### Regex Argument for Decompression
+
+- The regex decompression argument is used to specify the file or files which you want to decompress from the compressed file. The regex matches the file names in the compressed file, you can list them with `./perzip -s <compressed_file>`. Also, if you insert `./` symbol at the beginning of the regex, it will match the files in the current directory (The root directory of the compressed file). Furthermore, if you insert the `/*` symbol at the end of the regex, it will match all the files inside the folder selected.
+
+For example: 
+- `./perzip -d <compressed_file> <out_directory> "./folder/*"` will decompress all the files in the `folder` directory.
+- `./perzip -d <compressed_file> <out_directory> "folder/*"` will decompress all the files in the `folder` directory in the root directory of the compressed file.
+- `./perzip -d <compressed_file> <out_directory> "./folder"` will decompress the folder `folder` and all its contents.
+- `./perzip -d <compressed_file> <out_directory> "./folder/file.txt"` will decompress the file `file.txt` in the `folder` directory.
+- `./perzip -d <compressed_file> <out_directory> "file.txt"` will decompress the file `file.txt` in the root directory of the compressed file.
+- `./perzip -d <compressed_file> <out_directory>` will decompress all the files in the compressed file.`

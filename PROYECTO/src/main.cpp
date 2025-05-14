@@ -54,15 +54,28 @@ void printVersion() {
     std::cout << "RSA function version 1.0" << std::endl;
 }
 
-json compress(std::vector<std::string> files, const char* publicKey, const char* privateKey, Rsa& rsa_management, Huffman& huffman) {
+json compress(std::vector<std::string> files, int prime1, int prime2) {
+    /**
+     * Function to compress and encrypt files using RSA and Huffman encoding
+     * 
+     * @param files: A vector of file paths to be compressed and encrypted
+     * @param prime1: The first prime number for RSA key generation
+     * @param prime2: The second prime number for RSA key generation
+     * 
+     * @return: A JSON object containing the public key, private key, and compressed file data
+     */
+    Rsa rsa_management(prime1, prime2);
+
     // Create JSON object
     json jsonData;
     
-    jsonData["public_key"] = publicKey;
-    jsonData["private_key"] = privateKey;  
+    ResultGenerateKeys keys = rsa_management.generateKeys();
+    jsonData["public_key"] = keys.publicKey;
+    jsonData["private_key"] = keys.privateKey;
     jsonData["files"] = json::array();
 
-    for (size_t i = 0; i < files.size(); i++) {        
+    for (size_t i = 0; i < files.size(); i++) {
+        Huffman huffman;     
         // Read the file
         std::vector<uint8_t> fileData = FileManager::readBinaryFile(files[i]);
         if (fileData.empty()) {
@@ -70,7 +83,7 @@ json compress(std::vector<std::string> files, const char* publicKey, const char*
             continue;
         }
         
-        std::vector<uint8_t> encryptedData = rsa_management.encrypt(fileData, publicKey);
+        std::vector<uint8_t> encryptedData = rsa_management.encrypt(fileData, keys.publicKey);
         if (encryptedData.empty()) {
             std::cerr << "Warning: Failed to encrypt file " << files[i] << std::endl;
             continue;
@@ -120,16 +133,20 @@ json compress(std::vector<std::string> files, const char* publicKey, const char*
     return jsonData;
 }
 
-void decompress(const char* inputFile, const char* outputFile, std::string regexStr, Rsa& rsa_management, Huffman& huffman) {
+void decompress(const char* inputFile, const char* outputFile, std::string regexStr, int prime1, int prime2) {
     /**
-     * Function to decompress a file using the provided regex
+     * Function to decompress and decrypt files using RSA and Huffman encoding
      * 
-     * @param inputFile: The path of the input file to be decompressed
-     * @param outputFile: The path of the output file to save the decompressed data
-     * @param regexStr: The regex string to filter files
+     * @param inputFile: The path of the input JSON file containing compressed data
+     * @param outputFile: The path of the output directory to save decompressed files
+     * @param regexStr: A regex string to filter files to be extracted
+     * @param prime1: The first prime number for RSA key generation
+     * @param prime2: The second prime number for RSA key generation
      * 
      * @return: None
      */
+    Rsa rsa_management(prime1, prime2);
+
     // Load the JSON file
     ArchiveData archive = FileManager::loadJsonFile(inputFile);
 
@@ -152,6 +169,7 @@ void decompress(const char* inputFile, const char* outputFile, std::string regex
 
     // Decompress the files
     for (const auto& fileEntry : archive.files) {
+        Huffman huffman;
         std::string fileName = fileEntry.file_name;
 
         // Check the file name contains the regex
@@ -161,7 +179,7 @@ void decompress(const char* inputFile, const char* outputFile, std::string regex
 
         // Replace the matching part of the file name with output_file/
         std::string outputFileName = outputFile;
-        if (regexStr.empty()) {
+        if (regexStr.empty() || (!withoutExternalFolder && regexStr.substr(0, regexStr.find_last_of("/")) == regexStr)) {
             outputFileName += "/" + fileName;
         }
         else if (withoutExternalFolder) {
@@ -238,9 +256,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Rsa rsa_management(PRIME1, PRIME2);
-    Huffman huffman;
-
     std::string option = argv[1];
 
     if (option == "--help" || option == "-h") {
@@ -268,8 +283,6 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        ResultGenerateKeys keys = rsa_management.generateKeys();
-
         std::vector<std::string> allFiles = FileManager::getAllFilestoProcess(argv[2]);
 
         if (allFiles.empty()) {
@@ -277,7 +290,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        json jsonData = compress(allFiles, keys.publicKey, keys.privateKey, rsa_management, huffman);
+        json jsonData = compress(allFiles, PRIME1, PRIME2);
 
         if (FileManager::saveJsonFile(argv[3], jsonData)) {
             std::cout << "JSON file created successfully." << std::endl;
@@ -303,7 +316,7 @@ int main(int argc, char* argv[]) {
         std::string outputFile = argv[3];
         std::string regexStr = argc > 4 ? argv[4] : "";
 
-        decompress(inputFile.c_str(), outputFile.c_str(), regexStr, rsa_management, huffman);
+        decompress(inputFile.c_str(), outputFile.c_str(), regexStr, PRIME1, PRIME2);
     }
 
     else if (option == "--show" || option == "-s") {
