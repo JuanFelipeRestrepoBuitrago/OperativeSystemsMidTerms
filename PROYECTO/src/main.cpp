@@ -54,10 +54,11 @@ void printVersion() {
     std::cout << "RSA function version 1.0" << std::endl;
 }
 
-json compress(std::vector<std::string> files, int prime1, int prime2) {
+json compress(const char* inputFile, const std::vector<std::string>& files, int prime1, int prime2) {
     /**
      * Function to compress and encrypt files using RSA and Huffman encoding
      * 
+     * @param inputFile: The path of the input file to be compressed
      * @param files: A vector of file paths to be compressed and encrypted
      * @param prime1: The first prime number for RSA key generation
      * @param prime2: The second prime number for RSA key generation
@@ -115,7 +116,19 @@ json compress(std::vector<std::string> files, int prime1, int prime2) {
 
         json fileEntry;
         // Save the name of the file removing ./ or ../ or any secuence of them with regex
-        fileEntry["file_name"] = std::regex_replace(files[i], std::regex(R"(\.{1,2}[/])"), "");
+        std::string inputFileRegex, fileName;
+
+        if (std::regex_match(inputFile, std::regex(R"(\.{1,2}/?)"))) {
+            fileName = std::regex_replace(files[i], std::regex(R"(\.{1,2}[/])"), "");
+            inputFileRegex = "";
+        } else {
+            fileName = files[i];
+            inputFileRegex = inputFile;
+        }
+        // Save the name of the file removing the inputFile path except the last part
+        std::string lastPart = std::string(inputFileRegex).substr(std::string(inputFileRegex).find_last_of("/") + 1);
+
+        fileEntry["file_name"] = std::regex_replace(fileName, std::regex(inputFileRegex), lastPart);
         fileEntry["file_data"] = encodedData;
         fileEntry["huffman_table"] = json::array();
 
@@ -188,8 +201,6 @@ void decompress(const char* inputFile, const char* outputFile, std::string regex
             outputFileName += std::regex_replace(fileName, std::regex(regexStr.substr(0, regexStr.find_last_of("/"))), "");
         }
 
-        std::cout << "Decompressing file: " << fileName << " to " << outputFileName << std::endl;
-
         std::string fileData = fileEntry.file_data;
 
         // Decode the Base64 data
@@ -217,9 +228,7 @@ void decompress(const char* inputFile, const char* outputFile, std::string regex
             std::filesystem::create_directories(outputPath);
         }
 
-        if (FileManager::writeBinaryFile(outputFileName, decryptedData)) {
-            std::cout << "Decompressed file saved to: " << outputFileName << std::endl;
-        } else {
+        if (!FileManager::writeBinaryFile(outputFileName, decryptedData)) {
             std::cerr << "Error: Failed to save decompressed file " << outputFileName << std::endl;
         }
     }
@@ -283,6 +292,12 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
+        // Check the input file exists
+        if (!std::filesystem::exists(argv[2])) {
+            std::cerr << "Error: Input file does not exist." << std::endl;
+            return 1;
+        }
+
         std::vector<std::string> allFiles = FileManager::getAllFilestoProcess(argv[2]);
 
         if (allFiles.empty()) {
@@ -290,7 +305,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        json jsonData = compress(allFiles, PRIME1, PRIME2);
+        json jsonData = compress(argv[2], allFiles, PRIME1, PRIME2);
 
         if (FileManager::saveJsonFile(argv[3], jsonData)) {
             std::cout << "JSON file created successfully." << std::endl;
