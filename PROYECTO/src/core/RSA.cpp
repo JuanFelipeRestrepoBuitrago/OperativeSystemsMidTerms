@@ -60,19 +60,19 @@ std::vector<uint8_t> Rsa::encrypt(const std::vector<uint8_t>& data, const std::s
      * @return: The encrypted data
      */
     if (publicKeyStr.empty()) {
-        throw std::invalid_argument("No public key provided.");
+        throw std::invalid_argument("❌ Error: No public key provided");
     }
 
     std::vector<int> publicKeyValues = Utils::base64ToNumbers(publicKeyStr.c_str());
     if (publicKeyValues.size() != 2) {
-        throw std::invalid_argument("Invalid public key format.");
+        throw std::invalid_argument("❌ Error: Invalid public key format");
     }
     int e = publicKeyValues[0];
     int n = publicKeyValues[1];
 
     // Ensure n is large enough to encrypt values up to 255
     if (n < 256) {
-        throw std::invalid_argument("Modulus n is too small to encrypt byte values (must be >= 256).");
+        throw std::invalid_argument("❌ Error: Modulus n is too small to encrypt byte values (must be >= 256)");
     }
 
     std::vector<uint8_t> encryptedValues;
@@ -82,7 +82,7 @@ std::vector<uint8_t> Rsa::encrypt(const std::vector<uint8_t>& data, const std::s
         // Encrypt each byte
         int encrypted = Utils::powerModulus(static_cast<int>(byte), e, n);
         if (encrypted >= n) {
-            throw std::runtime_error("Encrypted value exceeds modulus n.");
+            throw std::runtime_error("❌ Error: Encrypted value exceeds modulus n");
         }
         // Store as 4 bytes (big-endian)
         encryptedValues.push_back(static_cast<uint8_t>(encrypted >> 24));
@@ -104,16 +104,16 @@ std::vector<uint8_t> Rsa::decrypt(const std::vector<uint8_t>& data, const std::s
      * @return: The decrypted data
      */
     if (privateKeyStr.empty()) {
-        throw std::invalid_argument("No private key provided.");
+        throw std::invalid_argument("❌ Error: No private key provided");
     }
 
     if (data.size() % 4 != 0) {
-        throw std::invalid_argument("Invalid encrypted data length (must be multiple of 4).");
+        throw std::invalid_argument("❌ Error: Invalid encrypted data length (must be multiple of 4)");
     }
 
     std::vector<int> privateKeyValues = Utils::base64ToNumbers(privateKeyStr.c_str());
     if (privateKeyValues.size() != 2) {
-        throw std::invalid_argument("Invalid private key format.");
+        throw std::invalid_argument("❌ Error: Invalid private key format");
     }
     int d = privateKeyValues[0];
     int n = privateKeyValues[1];
@@ -130,7 +130,7 @@ std::vector<uint8_t> Rsa::decrypt(const std::vector<uint8_t>& data, const std::s
         int decrypted = Utils::powerModulus(encrypted, d, n);
         // Ensure decrypted value is in byte range
         if (decrypted > 255) {
-            std::cerr << "Warning: Decrypted value " << decrypted << " exceeds uint8_t range for n=" << n << "." << std::endl;
+            std::cerr << "⚠️  Warning: Decrypted value " << decrypted << " exceeds uint8_t range for n=" << n << "\n" << std::endl;
             decrypted = decrypted % 256; // Truncate to fit (temporary fix)
         }
         decryptedValues.push_back(static_cast<uint8_t>(decrypted));
