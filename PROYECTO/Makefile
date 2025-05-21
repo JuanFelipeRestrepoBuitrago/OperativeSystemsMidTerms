@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -Wall -Wextra -std=c++17 -I/usr/include/gtest -Ilibs -I$(SOURCE_DIR)
 LDFLAGS = -lgtest -lgtest_main -pthread -lcrypto
-MACFLAGS = -I/opt/homebrew/opt/openssl@3/include -I/opt/homebrew/opt/googletest/include -L/opt/homebrew/opt/openssl@3/lib -L/opt/homebrew/opt/googletest/lib
+MACFLAGS = -I/opt/homebrew/opt/openssl@3/include -I/opt/homebrew/opt/googletest/include -L/opt/homebrew/opt/openssl@3/lib -L/opt/homebrew/opt/googletest/lib -I/opt/homebrew/opt/libomp/include -L/opt/homebrew/opt/libomp/lib
 
 SOURCE_DIR = src
 OUTDIR = out
@@ -10,7 +10,13 @@ LIB_DIR = libs
 # Detect operating system
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
+    CC = clang++
     CFLAGS += $(MACFLAGS)
+    # No OpenMP en Mac
+else
+    CC = g++
+    CFLAGS += -fopenmp
+    LDFLAGS += -fopenmp
 endif
 
 all: $(OUTDIR)/perzip
