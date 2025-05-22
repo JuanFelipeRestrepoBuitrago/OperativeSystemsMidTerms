@@ -1,4 +1,8 @@
 #include "Huffman.h"
+#include <omp.h>
+#include <sstream>
+#include <string>
+#include <chrono>
 
 Huffman::Huffman() : root(nullptr) {
     /**
@@ -33,25 +37,54 @@ void Huffman::deleteTree(Node *node) {
 
 void Huffman::buildTree(const std::unordered_map<char, int> &freqMap) {
     /**
-     * Function to build the Huffman tree based on character frequencies
+     * Function to build the Huffman tree based on character frequencies, using OpenMP
+     * to parallelize the node creation phase.
      * 
      * @param freqMap: A map containing characters and their corresponding frequencies
-     * 
-     * @return: None
      */
-    std::priority_queue<Node*, std::vector<Node*>, Compare> pq;
-    for (auto &[ch, freq] : freqMap) {
-        pq.push(new Node(ch, freq));
-    }
     
+     // Vector to hold nodes
+    auto start = std::chrono::high_resolution_clock::now();
+
+    std::vector<Node*> nodes(freqMap.size());
+
+    // Parallelize the node creation
+    std::vector<std::pair<char, int>> entries(freqMap.begin(), freqMap.end());
+
+    int numThreads = omp_get_max_threads();
+    printf("\033[1;36m🔵 [OpenMP (Huffman)] Threads used for building tree: %d\033[0m\n", numThreads);
+
+
+    #pragma omp parallel for
+    for (int i = 0; i < static_cast<int>(entries.size()); ++i) {
+        const auto& [ch, freq] = entries[i];
+        nodes[i] = new Node(ch, freq);
+    }
+
+    // Create a priority queue to hold the nodes
+    std::priority_queue<Node*, std::vector<Node*>, Compare> pq;
+    for (auto node : nodes) {
+        pq.push(node);
+    }
+
+    // Construir el árbol de Huffman (parte secuencial)
     while (pq.size() > 1) {
         Node *left = pq.top(); pq.pop();
         Node *right = pq.top(); pq.pop();
         Node *merged = new Node('\0', left->freq + right->freq, left, right);
         pq.push(merged);
     }
+
     root = pq.top();
-    generateCodes(root, "");
+    #pragma omp parallel
+    {
+        #pragma omp single
+        generateCodes(root, "");
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+
+    printf("\033[1;32m🟢 [Timing] Building tree and generating codes time: %lld ms\033[0m\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+
 }
 
 void Huffman::generateCodes(Node *node, const std::string &code) {
@@ -65,12 +98,20 @@ void Huffman::generateCodes(Node *node, const std::string &code) {
      */
     if (!node) return;
     if (!node->left && !node->right) {
-        huffmanCodes[node->ch] = code;
-        reverseCodes[code] = node->ch;
+        #pragma omp critical
+        {
+            huffmanCodes[node->ch] = code;
+            reverseCodes[code] = node->ch;
+        }
+        return;
     }
-    
+    #pragma omp task shared(huffmanCodes, reverseCodes)
     generateCodes(node->left, code + "0");
+
+    #pragma omp task shared(huffmanCodes, reverseCodes)
     generateCodes(node->right, code + "1");
+
+    #pragma omp taskwait
 }
 
 std::vector<char> Huffman::compress(const std::vector<char> &data) {
@@ -81,18 +122,35 @@ std::vector<char> Huffman::compress(const std::vector<char> &data) {
      * 
      * @return: A vector containing the compressed data
      */
-    std::unordered_map<char, int> freqMap;
-    for (char ch : data) {
-        freqMap[ch]++;
+
+    auto start = std::chrono::high_resolution_clock::now();
+    int numThreads = omp_get_max_threads();
+    printf("\033[1;36m🔵 [OpenMP (Huffman)] Threads used for compress: %d\033[0m\n", numThreads);
+
+    std::vector<std::string> partialEncoded(numThreads);
+    #pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        std::stringstream ss;
+        #pragma omp for
+        for (int i = 0; i < static_cast<int>(data.size()); ++i) {
+            ss << huffmanCodes[data[i]];
+        }
+        partialEncoded[tid] = ss.str();
     }
-    buildTree(freqMap);
-    
+
+    // Concatenate the partial encoded strings
     std::string encodedStr;
-    for (char ch : data) {
-        encodedStr += huffmanCodes[ch];
+    for (const auto& part : partialEncoded) {
+        encodedStr += part;
     }
-    
+
+    // Convert the encoded string to a vector of chars
     std::vector<char> compressedData(encodedStr.begin(), encodedStr.end());
+
+    auto end = std::chrono::high_resolution_clock::now();
+    printf("\033[1;32m🟢 [Timing] Compress time: %lld ms\033[0m\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+
     return compressedData;
 }
 
@@ -106,6 +164,7 @@ std::vector<char> Huffman::uncompress(const std::vector<char> &data,
      * 
      * @return: A vector containing the decompressed data
      */
+    auto start = std::chrono::high_resolution_clock::now();
     const std::unordered_map<std::string, char>& codesToUse = 
         (externalReverseCodes) ? *externalReverseCodes : reverseCodes;
 
@@ -121,6 +180,8 @@ std::vector<char> Huffman::uncompress(const std::vector<char> &data,
         }
     }
 
+    auto end = std::chrono::high_resolution_clock::now();
+    printf("\033[1;32m🟢 [Timing] Uncompress time: %lld ms\033[0m\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
     return std::vector<char>(decodedStr.begin(), decodedStr.end());
 }
 

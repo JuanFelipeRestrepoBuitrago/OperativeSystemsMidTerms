@@ -6,6 +6,7 @@
 #include "./helpers/FileManager.h"
 #include <cstdlib>
 #include "../libs/json.hpp"
+#include <chrono>
 #include <regex>
 #include <filesystem>
 
@@ -286,6 +287,7 @@ int main(int argc, char *argv[])
      *
      * @return: Exit status (0 for success, 1 for errors)
      */
+    auto start = std::chrono::high_resolution_clock::now();
     if (argc < 2)
     {
         std::cerr << RED << ERROR_EMOJI << " Error: No option provided." << RESET << std::endl;
@@ -424,5 +426,8 @@ int main(int argc, char *argv[])
         printUsage(argv[0]);
         return 1;
     }
+    auto end = std::chrono::high_resolution_clock::now();
+    printf("\033[1;32m🟢 [Timing] Total execution time: %lld ms\033[0m\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+
     return 0;
 }

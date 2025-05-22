@@ -1,4 +1,8 @@
 #include "Utils.h"
+#include <unordered_map>
+#include <vector>
+#include <omp.h>
+#include <chrono>
 
 using std::vector;
 using std::string;
@@ -244,15 +248,37 @@ std::vector<int> Utils::base64ToNumbers(const char* base64CStr) {
 
 std::unordered_map<char, int> Utils::createFreqMap(const std::vector<char>& data) {
     /**
-     * Function to create a frequency map of characters in a given data
+     * Function to create a frequency map of characters in a given data using OpenMP
      * 
      * @param data: The data to create the frequency map from
      * 
      * @return: The frequency map of characters in the input data
      */
-    std::unordered_map<char, int> freqMap;
-    for (char ch : data) {
-        freqMap[ch]++;
+    auto start = std::chrono::high_resolution_clock::now();
+    int numThreads = omp_get_max_threads();
+    std::vector<std::unordered_map<char, int>> threadMaps(numThreads);
+    printf("\033[1;36m🔵 [OpenMP (Huffman)] Threads used for create frequency map of characters: %d\033[0m\n", numThreads);
+
+    #pragma omp parallel
+    {
+        int threadId = omp_get_thread_num();
+        auto& localMap = threadMaps[threadId];
+
+        #pragma omp for
+        for (size_t i = 0; i < data.size(); ++i) {
+            localMap[data[i]]++;
+        }
     }
+
+    // Merge all local maps into a global map
+    std::unordered_map<char, int> freqMap;
+    for (const auto& localMap : threadMaps) {
+        for (const auto& pair : localMap) {
+            freqMap[pair.first] += pair.second;
+        }
+    }
+    auto end = std::chrono::high_resolution_clock::now();
+    printf("\033[1;32m🟢 [Timing] Creation frequency map time: %lld ms\033[0m\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+
     return freqMap;
 }
