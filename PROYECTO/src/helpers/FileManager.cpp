@@ -13,7 +13,7 @@ void FileManager::writeBinaryFile(const std::string& filePath, const std::vector
      */
     int fd = open(filePath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd == -1) {
-        perror("Error opening file for writing");
+        std::cerr << "❌ Error: Could not open file '" << filePath << "' for writing\n" << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -69,7 +69,7 @@ bool FileManager::writeBinaryFile(const std::string& filePath, const std::vector
 std::vector<uint8_t> FileManager::readBinaryFile(const std::string& path) {
     std::ifstream in{path, std::ios::binary | std::ios::ate};
     if (!in) {
-        throw std::runtime_error("Cannot open file: " + path);
+        throw std::runtime_error("❌ Error: Cannot open file '" + path + "' for reading");
     }
 
     // determine size and rewind
@@ -79,7 +79,7 @@ std::vector<uint8_t> FileManager::readBinaryFile(const std::string& path) {
     // read all bytes
     std::vector<uint8_t> buffer(size);
     if (!in.read(reinterpret_cast<char*>(buffer.data()), size)) {
-        throw std::runtime_error("Failed to read file: " + path);
+        throw std::runtime_error("❌ Error: Failed to read file '" + path + "'");
     }
 
     return buffer;
@@ -121,7 +121,7 @@ bool FileManager::saveJsonFile(const std::string& filePath, const json& jsonData
      */
     std::ofstream file(filePath);
     if (!file) {
-        std::cerr << "Failed to open output JSON file." << std::endl;
+        std::cerr << "❌ Error: Could not open output JSON file '" << filePath << "'\n" << std::endl;
         return false;
     }
     else if (file.is_open()) {
@@ -129,7 +129,7 @@ bool FileManager::saveJsonFile(const std::string& filePath, const json& jsonData
         file.close();
         return true;
     } else {
-        std::cerr << "Error opening file for writing JSON data." << std::endl;
+        std::cerr << "❌ Error: Failed to write JSON data to '" << filePath << "'\n" << std::endl;
         return false;
     }
 }
@@ -144,7 +144,7 @@ ArchiveData FileManager::loadJsonFile(const std::string& filePath) {
      */
     std::ifstream file(filePath);
     if (!file.is_open()) {
-        throw std::runtime_error("Failed to open input JSON file.");
+        throw std::runtime_error("❌ Error: Could not open input JSON file '" + filePath + "'");
     }
 
     json jsonData;
@@ -154,48 +154,48 @@ ArchiveData FileManager::loadJsonFile(const std::string& filePath) {
 
     // Validate JSON structure
     if (!jsonData.is_object()) {
-        throw std::runtime_error("Invalid JSON format: root must be an object");
+        throw std::runtime_error("❌ Error: Invalid JSON format - root must be an object");
     }
 
     // Extract public_key
     if (!jsonData.contains("public_key") || !jsonData["public_key"].is_string()) {
-        throw std::runtime_error("Invalid JSON: missing or invalid 'public_key'");
+        throw std::runtime_error("❌ Error: Invalid JSON - missing or invalid 'public_key'");
     }
     archive.public_key = jsonData["public_key"].get<std::string>();
 
     // Extract private_key
     if (!jsonData.contains("private_key") || !jsonData["private_key"].is_string()) {
-        throw std::runtime_error("Invalid JSON: missing or invalid 'private_key'");
+        throw std::runtime_error("❌ Error: Invalid JSON - missing or invalid 'private_key'");
     }
     archive.private_key = jsonData["private_key"].get<std::string>();
 
     // Extract files
     if (!jsonData.contains("files") || !jsonData["files"].is_array()) {
-        throw std::runtime_error("Invalid JSON: missing or invalid 'files' array");
+        throw std::runtime_error("❌ Error: Invalid JSON - missing or invalid 'files' array");
     }
 
     for (const auto& fileEntryJson : jsonData["files"]) {
         if (!fileEntryJson.is_object()) {
-            std::cerr << "Warning: Skipping invalid file entry (not an object)" << std::endl;
+            std::cerr << "⚠️  Warning: Skipping invalid file entry (not an object)\n" << std::endl;
             continue;
         }
 
         FileEntry fileEntry;
 
         if (!fileEntryJson.contains("file_name") || !fileEntryJson["file_name"].is_string()) {
-            std::cerr << "Warning: Missing or invalid 'file_name' in file entry" << std::endl;
+            std::cerr << "⚠️  Warning: Missing or invalid 'file_name' in file entry\n" << std::endl;
             continue;
         }
         fileEntry.file_name = fileEntryJson["file_name"].get<std::string>();
 
         if (!fileEntryJson.contains("file_data") || !fileEntryJson["file_data"].is_string()) {
-            std::cerr << "Warning: Missing or invalid 'file_data' in file entry" << std::endl;
+            std::cerr << "⚠️  Warning: Missing or invalid 'file_data' in file entry\n" << std::endl;
             continue;
         }
         fileEntry.file_data = fileEntryJson["file_data"].get<std::string>();
 
         if (!fileEntryJson.contains("huffman_table") || !fileEntryJson["huffman_table"].is_array()) {
-            std::cerr << "Warning: Missing or invalid 'huffman_table' in file entry" << std::endl;
+            std::cerr << "⚠️  Warning: Missing or invalid 'huffman_table' in file entry\n" << std::endl;
             continue;
         }
         for (const auto& tableEntry : fileEntryJson["huffman_table"]) {
@@ -203,7 +203,7 @@ ArchiveData FileManager::loadJsonFile(const std::string& filePath) {
                 !tableEntry.contains("letter") || !(tableEntry["letter"].is_number_unsigned()
                     || tableEntry["letter"].is_number_integer()) ||
                 !tableEntry.contains("code") || !tableEntry["code"].is_string()) {
-                std::cerr << "Warning: Skipping invalid Huffman table entry in " << fileEntry.file_name << std::endl;
+                std::cerr << "⚠️  Warning: Skipping invalid Huffman table entry in '" << fileEntry.file_name << "'\n" << std::endl;
                 continue;
             }
             int letterVal = tableEntry["letter"].get<int>();
@@ -215,7 +215,7 @@ ArchiveData FileManager::loadJsonFile(const std::string& filePath) {
     }
 
     if (archive.files.empty()) {
-        throw std::runtime_error("Invalid JSON: no valid files found");
+        throw std::runtime_error("❌ Error: No valid files found in archive");
     }
 
     // Close and clean up
