@@ -101,7 +101,7 @@ std::vector<uint8_t> Rsa::encrypt(const std::vector<uint8_t> &data, const std::s
 #ifdef _OPENMP
         if (i == 0)
         {
-            printf("\033[1;36m🔵 [OpenMP] Threads used for encryption: %d\033[0m\n", omp_get_num_threads());
+            printf("\033[1;36m🔵 [OpenMP (RSA)] Threads used for encryption: %d\033[0m\n", omp_get_num_threads());
         }
 #endif
         uint8_t byte = data[i];
@@ -161,7 +161,7 @@ std::vector<uint8_t> Rsa::decrypt(const std::vector<uint8_t> &data, const std::s
 #ifdef _OPENMP
         if (i == 0)
         {
-            printf("\033[1;36m🔵 [OpenMP] Threads used for decryption: %d\033[0m\n", omp_get_num_threads());
+            printf("\033[1;36m🔵 [OpenMP (RSA)] Threads used for decryption: %d\033[0m\n", omp_get_num_threads());
         }
 #endif
         int encrypted = (static_cast<int>(data[i]) << 24) |
